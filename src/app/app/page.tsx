@@ -1,6 +1,8 @@
 import { createClientForServerComponent } from '@/lib/supabase';
+import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
+import { ReferenceCvPanel } from './reference-cv-panel';
 
 export default async function AppHome() {
   const supabase = createClientForServerComponent();
@@ -25,6 +27,20 @@ export default async function AppHome() {
     .order('created_at', { ascending: false });
 
   const formKey = profile?.updated_at ?? 'new-profile';
+  const referenceCv = cvs?.find((cv) => cv.is_reference);
+
+  let latestOptimization: Database['public']['Tables']['optimized_cvs']['Row'] | null = null;
+  if (referenceCv) {
+    const { data: optimized } = await supabase
+      .from('optimized_cvs')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('cv_id', referenceCv.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    latestOptimization = optimized ?? null;
+  }
 
   return (
     <div className="space-y-10">
@@ -36,7 +52,16 @@ export default async function AppHome() {
       </div>
       <ProfileForm key={formKey} initial={profile ?? null} />
 
-      <CvSection cvs={cvs ?? []} />
+      <ReferenceCvPanel
+        referenceCv={referenceCv ?? null}
+        latestOptimization={latestOptimization}
+        defaultLevel={profile?.embellishment_level ?? 3}
+      />
+
+      <div id="cv-library" className="space-y-4">
+        <h2 className="text-lg font-semibold text-slate-900">CV Library</h2>
+        <CvSection cvs={cvs ?? []} />
+      </div>
     </div>
   );
 }

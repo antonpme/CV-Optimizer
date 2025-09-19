@@ -163,6 +163,41 @@ export type Database = {
           updated_at?: string | null;
         };
       };
+      optimized_cvs: {
+        Row: {
+          id: string;
+          user_id: string;
+          cv_id: string;
+          optimized_text: string;
+          optimization_summary: Json | null;
+          ai_model_used: string | null;
+          confidence_score: number | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          cv_id: string;
+          optimized_text: string;
+          optimization_summary?: Json | null;
+          ai_model_used?: string | null;
+          confidence_score?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          cv_id?: string;
+          optimized_text?: string;
+          optimization_summary?: Json | null;
+          ai_model_used?: string | null;
+          confidence_score?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
       ai_runs: {
         Row: {
           id: string;

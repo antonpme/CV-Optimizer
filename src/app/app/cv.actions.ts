@@ -16,6 +16,11 @@ export type UploadCvState = {
   errors?: Record<string, string>;
 };
 
+export type OptimizeCvState = {
+  status: 'idle' | 'running' | 'success' | 'error';
+  message?: string;
+};
+
 const uploadSchema = z.object({
   title: z.string().max(120).optional(),
   pasted_text: z.string().trim().optional(),
@@ -202,4 +207,147 @@ export async function setReferenceCv(cvId: string) {
     .eq('id', cvId);
 
   revalidatePath('/app');
+}
+
+const optimizeFormSchema = z.object({
+  cv_id: z.string().uuid(),
+  embellishment_level: z.coerce.number().int().min(1).max(5),
+});
+
+import { callCvOptimization } from '@/lib/ai';
+
+export async function optimizeReferenceCv(
+  prevState: OptimizeCvState,
+  formData: FormData,
+): Promise<OptimizeCvState> {
+  const supabase = createClientForServerAction();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return { status: 'error', message: 'You must be signed in.' };
+  }
+
+  const parsed = optimizeFormSchema.safeParse({
+    cv_id: formData.get('cv_id'),
+    embellishment_level: formData.get('embellishment_level'),
+  });
+
+  if (!parsed.success) {
+    return {
+      status: 'error',
+      message: 'Invalid request. Please try again.',
+    };
+  }
+
+  const { cv_id: cvId, embellishment_level: embellishment } = parsed.data;
+
+  const { data: cv, error: cvError } = await supabase
+    .from('cvs')
+    .select('*')
+    .eq('id', cvId)
+    .eq('user_id', session.user.id)
+    .single();
+
+  if (cvError || !cv) {
+    return {
+      status: 'error',
+      message: 'CV not found.',
+    };
+  }
+
+  if (!cv.is_reference) {
+    return {
+      status: 'error',
+      message: 'Only the reference CV can be optimised.',
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .single();
+
+  try {
+    const { result, usage } = await callCvOptimization({
+      model: 'gpt-4o-mini',
+      cvText: cv.text_content,
+      profile: {
+        full_name: profile?.full_name ?? undefined,
+        job_title: profile?.job_title ?? undefined,
+        professional_summary: profile?.professional_summary ?? undefined,
+        industry: profile?.industry ?? undefined,
+        embellishment_level: profile?.embellishment_level ?? undefined,
+      },
+      embellishmentLevel: embellishment,
+    });
+
+    const now = new Date().toISOString();
+
+    const { error: insertOptimized } = await supabase.from('optimized_cvs').insert({
+      user_id: session.user.id,
+      cv_id: cv.id,
+      optimized_text: result.optimized_cv,
+      optimization_summary: {
+        changes_summary: result.changes_summary,
+        recommendations: result.recommendations,
+        overall_confidence: result.overall_confidence,
+      },
+      ai_model_used: 'gpt-4o-mini',
+      confidence_score: result.overall_confidence ?? null,
+      created_at: now,
+      updated_at: now,
+    });
+
+    if (insertOptimized) {
+      throw new Error(insertOptimized.message);
+    }
+
+    await supabase
+      .from('cvs')
+      .update({ updated_at: now })
+      .eq('id', cv.id)
+      .eq('user_id', session.user.id);
+
+    await supabase.from('ai_runs').insert({
+      user_id: session.user.id,
+      run_type: 'optimize_cv',
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      tokens_input: usage?.prompt_tokens ?? null,
+      tokens_output: usage?.completion_tokens ?? null,
+      status: 'success',
+      metadata: {
+        cv_id: cv.id,
+        embellishment_level: embellishment,
+      },
+      created_at: now,
+    });
+
+    revalidatePath('/app');
+    return {
+      status: 'success',
+      message: 'Reference CV optimised.',
+    };
+  } catch (error: unknown) {
+    await supabase.from('ai_runs').insert({
+      user_id: session.user.id,
+      run_type: 'optimize_cv',
+      provider: 'openai',
+      model: 'gpt-4o-mini',
+      status: 'failed',
+      metadata: {
+        cv_id: cv.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      created_at: new Date().toISOString(),
+    });
+
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Optimisation failed.',
+    };
+  }
 }

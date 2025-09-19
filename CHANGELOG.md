@@ -11,6 +11,8 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Integrate Supabase auth (magic-link sign-in, middleware, callback route, sign-out) (T1.4)
 - Protected `/app` dashboard layout with nav, sign-out, and Zod-validated profile form (T2.3)
 - CV upload workflow (DOCX/TXT + pasted text) with Supabase Storage, reference toggle, and UI listing (T3.1)
+- Reference CV optimisation flow (OpenAI JSON schema, `optimized_cvs` storage, diff preview) (T3.2)
+- AI gateway helper (`lib/ai.ts`) with chat completion wrapper and usage logging (T3.3)
 
 ## [1.1] - 2025-09-08
 ### Added

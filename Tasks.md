@@ -42,15 +42,15 @@
 - [x] `T3.1` CV upload/paste API (`/api/cv`) (Prereq: T2.2)
   Output: API route storing DOCX/TXT uploads or pasted text in Supabase Storage + `cvs` table with validation.
   Implementation: ✅ COMPLETE — Server action `uploadCv` (DOCX via Mammoth, TXT or pasted text) saves content to `cvs`, uploads files to `cv-uploads`, auto-selects first reference CV, and revalidates `/app`.
-- [ ] `T3.2` Reference optimization endpoint (`/api/cv/:id/optimize`) (Prereq: T3.1)
+- [x] `T3.2` Reference optimization endpoint (`/api/cv/:id/optimize`) (Prereq: T3.1)
   Output: AI-powered reference CV creator saving change summary, confidence, and marking reference flag.
-  Implementation: Pending.
-- [ ] `T3.3` AI gateway module (Prereq: T3.2)
+  Implementation: ✅ COMPLETE — Server action `optimizeReferenceCv` fetches reference CV + profile, calls OpenAI (JSON schema), stores results in `optimized_cvs`, logs usage to `ai_runs`, and revalidates dashboard.
+- [x] `T3.3` AI gateway module (Prereq: T3.2)
   Output: Shared OpenAI client with JSON schema enforcement, retry/backoff, token logging to `ai_runs`.
-  Implementation: Pending.
-- [ ] `T3.4` CV intake UI (Prereq: T3.1)
+  Implementation: ✅ COMPLETE — `lib/ai.ts` encapsulates chat completion request with schema validation (Zod) and returns usage metrics for logging.
+- [x] `T3.4` CV intake UI (Prereq: T3.1)
   Output: Upload + paste experience with progress state, error handling, and reference CV preview.
-  Implementation: Pending.
+  Implementation: ✅ COMPLETE — Dashboard CV section with upload form, pasted text support, success/error messaging, and diff-enabled reference review panel.
 
 ### Phase 4 – JD Management & Tailored Generation (Week 4)
 - [ ] `T4.1` JD paste API (`/api/jd`) (Prereq: T2.2)

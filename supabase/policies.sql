@@ -6,6 +6,7 @@ alter table public.cvs enable row level security;
 alter table public.job_descriptions enable row level security;
 alter table public.generated_cvs enable row level security;
 alter table public.ai_runs enable row level security;
+alter table public.optimized_cvs enable row level security;
 
 -- Profiles owner policy
 drop policy if exists profiles_owner on public.profiles;
@@ -32,3 +33,7 @@ drop policy if exists ai_runs_owner_select on public.ai_runs;
 create policy ai_runs_owner_select on public.ai_runs
   for select using (user_id = auth.uid());
 
+-- Optimized CVs owner policy
+drop policy if exists optimized_cvs_owner on public.optimized_cvs;
+create policy optimized_cvs_owner on public.optimized_cvs
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());

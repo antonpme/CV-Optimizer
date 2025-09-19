@@ -35,6 +35,19 @@ create table if not exists public.cvs (
   updated_at timestamptz default now()
 );
 
+-- Optimized CVs (latest reference optimisations)
+create table if not exists public.optimized_cvs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  cv_id uuid not null references public.cvs(id) on delete cascade,
+  optimized_text text not null,
+  optimization_summary jsonb,
+  ai_model_used text,
+  confidence_score numeric(4,2),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
 -- Job Descriptions (paste-only in MVP)
 create table if not exists public.job_descriptions (
   id uuid primary key default gen_random_uuid(),
@@ -79,4 +92,4 @@ create table if not exists public.ai_runs (
 create index if not exists idx_cvs_user on public.cvs(user_id, created_at desc);
 create index if not exists idx_jd_user on public.job_descriptions(user_id, created_at desc);
 create index if not exists idx_gc_user on public.generated_cvs(user_id, created_at desc);
-
+create index if not exists idx_optimized_cvs_user on public.optimized_cvs(user_id, created_at desc);
