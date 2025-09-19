@@ -8,6 +8,7 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Add .env.example and SETUP.md for environment and onboarding
 - Scaffold Next.js app with auth, layout, and route handlers (planned)
 - Bootstrap Next.js 14 app (App Router, Tailwind, ESLint) with src/ structure (T1.3)
+- Integrate Supabase auth (magic-link sign-in, middleware, callback route, sign-out) (T1.4)
 
 ## [1.1] - 2025-09-08
 ### Added

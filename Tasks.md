@@ -20,9 +20,9 @@
 - [x] `T1.3` Next.js codebase scaffolding (Prereq: T1.1)
   Output: Next.js 14 + TypeScript repo with Tailwind, shadcn/ui, linting/formatting tooling configured.
   Implementation: ✅ COMPLETE — `create-next-app` scaffolded with App Router, Tailwind, ESLint, src/ structure; lint run; CHANGELOG updated. Local `node_modules/` present (ignored). Remove `tmp-next-delete/` directory when OS permits.
-- [ ] `T1.4` Supabase Auth integration (Prereq: T1.2, T1.3)
+- [x] `T1.4` Supabase Auth integration (Prereq: T1.2, T1.3)
   Output: Email/magic-link sign-in flow working locally and on Vercel preview, SSR session helper in place.
-  Implementation: Pending.
+  Implementation: ✅ COMPLETE — Added Supabase auth helpers (middleware, server actions, callback route), magic-link email form with `useFormState`, sign-out action, and home page session awareness.
 - [x] `T1.5` Initialize CHANGELOG.md (Prereq: —)
   Output: `CHANGELOG.md` created with Solo MVP v1.1 entry and Unreleased section.
    Implementation: ✅ COMPLETE — Initial changelog added capturing doc updates and MVP scope.
