@@ -28,20 +28,20 @@
    Implementation: ✅ COMPLETE — Initial changelog added capturing doc updates and MVP scope.
 
 ### Phase 2 – Data & Profile (Week 2)
-- [ ] `T2.1` Database schema migration (Prereq: T1.2)
+- [x] `T2.1` Database schema migration (Prereq: T1.2)
   Output: Tables `profiles`, `cvs`, `job_descriptions`, `generated_cvs`, `ai_runs` created with Supabase SQL migration.
-  Implementation: Pending.
-- [ ] `T2.2` RLS and indexes (Prereq: T2.1)
+  Implementation: ✅ COMPLETE — `supabase/schema.sql` provisions all core tables (profiles, cvs, job descriptions, generated CVs, AI runs) with defaults and timestamps.
+- [x] `T2.2` RLS and indexes (Prereq: T2.1)
   Output: RLS owner policies and helpful indexes applied to all tables; verified with Supabase policy checks.
-  Implementation: Pending.
-- [ ] `T2.3` Profile & settings UI (Prereq: T1.4, T2.2)
+  Implementation: ✅ COMPLETE — `supabase/policies.sql` + `supabase/storage.sql` enforce per-user access on tables and `cv-uploads` bucket, with user-scoped indexes for dashboard queries.
+- [x] `T2.3` Profile & settings UI (Prereq: T1.4, T2.2)
   Output: Profile page capturing summary, links, embellishment level, retention days; persists to Supabase.
-  Implementation: Pending.
+  Implementation: ✅ COMPLETE — Protected `/app` layout with nav + sign-out, Zod-validated profile form using server actions, success/error messaging, and Supabase upsert with timestamps.
 
 ### Phase 3 – CV Intake & Reference Optimization (Week 3)
-- [ ] `T3.1` CV upload/paste API (`/api/cv`) (Prereq: T2.2)
+- [x] `T3.1` CV upload/paste API (`/api/cv`) (Prereq: T2.2)
   Output: API route storing DOCX/TXT uploads or pasted text in Supabase Storage + `cvs` table with validation.
-  Implementation: Pending.
+  Implementation: ✅ COMPLETE — Server action `uploadCv` (DOCX via Mammoth, TXT or pasted text) saves content to `cvs`, uploads files to `cv-uploads`, auto-selects first reference CV, and revalidates `/app`.
 - [ ] `T3.2` Reference optimization endpoint (`/api/cv/:id/optimize`) (Prereq: T3.1)
   Output: AI-powered reference CV creator saving change summary, confidence, and marking reference flag.
   Implementation: Pending.

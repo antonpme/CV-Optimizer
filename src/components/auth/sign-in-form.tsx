@@ -4,6 +4,8 @@ import { useFormState, useFormStatus } from 'react-dom';
 import type { SignInState } from '@/app/actions/auth';
 import { signInWithEmail } from '@/app/actions/auth';
 
+const initialState: SignInState = { status: 'idle' };
+
 function SubmitButton() {
   const { pending } = useFormStatus();
 
@@ -18,16 +20,11 @@ function SubmitButton() {
   );
 }
 
-const initialState: SignInState = { status: 'idle' };
-
 export function SignInForm() {
   const [state, formAction] = useFormState(signInWithEmail, initialState);
 
   return (
-    <form
-      className="grid gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-      action={formAction}
-    >
+    <form className="grid gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm" action={formAction}>
       <div className="grid gap-2">
         <label htmlFor="email" className="text-sm font-medium text-slate-700">
           Email address
@@ -42,7 +39,7 @@ export function SignInForm() {
           autoComplete="email"
         />
         <p className="text-xs text-slate-500">
-          We’ll email you a one-time sign-in link. No password required.
+          We&apos;ll email you a one-time sign-in link. No password required.
         </p>
       </div>
 

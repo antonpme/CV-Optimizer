@@ -31,6 +31,7 @@ Job seekers face significant challenges in tailoring their CVs for multiple job 
 - Paste CV text option (primary path)
 - AI-powered optimization to create a “Reference CV”
 - Change summary with transparency and confidence indicators
+- CV library to manage uploads/pasted versions with single reference selection
 
 #### 4.3 Job Description Management
 - Paste job description text (no web scraping in MVP)

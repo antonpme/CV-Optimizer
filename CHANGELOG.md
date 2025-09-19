@@ -9,6 +9,8 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Scaffold Next.js app with auth, layout, and route handlers (planned)
 - Bootstrap Next.js 14 app (App Router, Tailwind, ESLint) with src/ structure (T1.3)
 - Integrate Supabase auth (magic-link sign-in, middleware, callback route, sign-out) (T1.4)
+- Protected `/app` dashboard layout with nav, sign-out, and Zod-validated profile form (T2.3)
+- CV upload workflow (DOCX/TXT + pasted text) with Supabase Storage, reference toggle, and UI listing (T3.1)
 
 ## [1.1] - 2025-09-08
 ### Added

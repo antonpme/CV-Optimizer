@@ -584,6 +584,8 @@ interface SetReferenceCVResponse {
 }
 ```
 
+_Implementation (MVP) currently uses Next.js server actions (`uploadCv`, `setReferenceCv`) to achieve the same behaviour: DOCX/TXT (≤5MB) ingestion via Supabase Storage, pasted-text support, and automatic reference selection._
+
 #### 4.4 Job Description Endpoints
 
 ```typescript
