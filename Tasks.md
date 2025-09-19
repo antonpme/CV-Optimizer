@@ -11,21 +11,20 @@
 
 ---
 
-### Phase 1 – Foundation (Week 1)
-- [ ] `T1.1` Vercel project bootstrap (Prereq: —)
+- [x] `T1.1` Vercel project bootstrap (Prereq: —)
   Output: Vercel project with main preview deployment, custom domain placeholder, environment variable skeleton committed.
-  Implementation: Pending.
-- [ ] `T1.2` Supabase project setup (Prereq: T1.1)
+  Implementation: ✅ COMPLETE — Imported GitHub repo as `ai-cv-optimizer`, configured env vars (Supabase + OpenAI). First build failed pre-app; ready to redeploy after Next.js scaffold.
+- [x] `T1.2` Supabase project setup (Prereq: T1.1)
   Output: Supabase project in EU (Frankfurt), RLS enabled globally, anon/service keys stored securely.
-  Implementation: Pending.
-- [ ] `T1.3` Next.js codebase scaffolding (Prereq: T1.1)
+  Implementation: ✅ COMPLETE — Supabase (FRA1) created via Vercel, Auth (magic link) enabled, schema/policies/storage scripts applied; keys stored for Vercel envs (regenerate prod before launch).
+- [x] `T1.3` Next.js codebase scaffolding (Prereq: T1.1)
   Output: Next.js 14 + TypeScript repo with Tailwind, shadcn/ui, linting/formatting tooling configured.
-  Implementation: Pending.
+  Implementation: ✅ COMPLETE — `create-next-app` scaffolded with App Router, Tailwind, ESLint, src/ structure; lint run; CHANGELOG updated. Local `node_modules/` present (ignored). Remove `tmp-next-delete/` directory when OS permits.
 - [ ] `T1.4` Supabase Auth integration (Prereq: T1.2, T1.3)
   Output: Email/magic-link sign-in flow working locally and on Vercel preview, SSR session helper in place.
   Implementation: Pending.
- - [x] `T1.5` Initialize CHANGELOG.md (Prereq: —)
-   Output: `CHANGELOG.md` created with Solo MVP v1.1 entry and Unreleased section.
+- [x] `T1.5` Initialize CHANGELOG.md (Prereq: —)
+  Output: `CHANGELOG.md` created with Solo MVP v1.1 entry and Unreleased section.
    Implementation: ✅ COMPLETE — Initial changelog added capturing doc updates and MVP scope.
 
 ### Phase 2 – Data & Profile (Week 2)

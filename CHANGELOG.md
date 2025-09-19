@@ -7,6 +7,7 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Add initial Supabase SQL migrations and RLS policies (schema.sql, policies.sql, storage.sql)
 - Add .env.example and SETUP.md for environment and onboarding
 - Scaffold Next.js app with auth, layout, and route handlers (planned)
+- Bootstrap Next.js 14 app (App Router, Tailwind, ESLint) with src/ structure (T1.3)
 
 ## [1.1] - 2025-09-08
 ### Added
