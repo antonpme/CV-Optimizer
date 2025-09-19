@@ -24,7 +24,9 @@ export async function signInWithEmail(
   }
 
   const supabase = createClientForServerAction();
-  const origin = headers().get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
+  // In Next 15, headers() is async in server actions
+  const hdrs = await headers();
+  const origin = hdrs.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
   const emailRedirectTo = origin ? `${origin}/auth/callback` : undefined;
 
   const { error } = await supabase.auth.signInWithOtp({
