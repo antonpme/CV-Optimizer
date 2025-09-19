@@ -49,7 +49,10 @@ const numberString = (value: FormDataEntryValue | null, fallback: number) => {
   return trimmed.length ? trimmed : String(fallback);
 };
 
-export async function updateProfile(formData: FormData): Promise<ProfileActionState> {
+export async function updateProfile(
+  _prevState: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
   const supabase = createClientForServerAction();
   const {
     data: { session },
@@ -118,4 +121,3 @@ export async function updateProfile(formData: FormData): Promise<ProfileActionSt
   revalidatePath('/app');
   return { status: 'success', message: 'Profile updated.' };
 }
-
