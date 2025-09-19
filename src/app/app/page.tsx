@@ -8,6 +8,10 @@ export default async function AppHome() {
     data: { session },
   } = await supabase.auth.getSession();
 
+  if (!session?.user) {
+    return null;
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
