@@ -4,14 +4,10 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClientForServerAction } from '@/lib/supabase';
 
-type SignInState = {
+export type SignInState = {
   status: 'idle' | 'sent' | 'error';
   message?: string;
 };
-
-const initialState: SignInState = { status: 'idle' };
-
-export { initialState as signInInitialState };
 
 export async function signInWithEmail(
   _prevState: SignInState,

@@ -1,7 +1,8 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { signInInitialState, signInWithEmail } from '@/app/actions/auth';
+import type { SignInState } from '@/app/actions/auth';
+import { signInWithEmail } from '@/app/actions/auth';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -17,8 +18,10 @@ function SubmitButton() {
   );
 }
 
+const initialState: SignInState = { status: 'idle' };
+
 export function SignInForm() {
-  const [state, formAction] = useFormState(signInWithEmail, signInInitialState);
+  const [state, formAction] = useFormState(signInWithEmail, initialState);
 
   return (
     <form
