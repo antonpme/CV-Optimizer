@@ -1,8 +1,8 @@
 # Product Requirements Document (PRD)
-## AI-Powered CV Optimization Platform
+## AI-Powered CV Optimization Platform — Solo MVP v1.1
 
 ### 1. Product Vision
-To create an intelligent web application that empowers job seekers to optimize their CVs for specific job applications using AI analysis, dramatically improving their chances of landing interviews while maintaining ethical standards and user control.
+Deliver a solo-friendly, managed-stack web application that empowers job seekers to optimize their CVs for specific job applications using AI, with a simple, transparent, and ATS-friendly workflow. Prioritize low operational complexity (Vercel + Supabase), ethical boundaries, and user control over AI changes.
 
 ### 2. Problem Statement
 Job seekers face significant challenges in tailoring their CVs for multiple job applications:
@@ -18,49 +18,45 @@ Job seekers face significant challenges in tailoring their CVs for multiple job 
 - **Demographics**: Tech-savvy individuals comfortable with AI tools
 - **Geographic**: Global (English-speaking markets initially)
 
-### 4. Core Features
+### 4. Core Features (MVP)
 
 #### 4.1 User Authentication & Profile Management
-- User registration and login
-- Personal profile creation (name, email, professional details)
-- Social media and website links integration
-- Profile management and updates
+- Email/magic-link authentication (Supabase Auth)
+- Personal profile (name, location, professional summary)
+- Social and website links (LinkedIn, GitHub, portfolio)
+- Profile management and settings (embellishment level, retention)
 
-#### 4.2 CV Upload & Optimization
-- Multiple file format support (PDF, DOC, DOCX, TXT)
-- AI-powered CV analysis and optimization
-- Creation of reference optimized CV
-- Version control and history tracking
+#### 4.2 CV Input & Optimization
+- Supported formats (MVP): DOCX and TXT (PDF later)
+- Paste CV text option (primary path)
+- AI-powered optimization to create a “Reference CV”
+- Change summary with transparency and confidence indicators
 
 #### 4.3 Job Description Management
-- URL input for job descriptions (1-20 URLs)
-- Automatic web scraping and content extraction
+- Paste job description text (no web scraping in MVP)
 - JD parsing and requirement analysis
 - Keyword extraction and categorization
 
 #### 4.4 AI-Powered CV Generation
-- Tailored CV creation per job description
-- Matching algorithm between CV and JD requirements
-- Multiple optimization options per position
-- Real-time generation with progress tracking
+- Tailored CV creation per pasted JD
+- Matching analysis between Reference CV and JD requirements
+- Embellishment control (1–5) with ethical guardrails
+- Sequential processing with progress indicators
 
-#### 4.5 Cover Letter Generation
-- Automatic cover letter creation when required
-- Personalized content based on CV and JD
-- Multiple tone options (professional, enthusiastic, etc.)
-- Integration with CV optimization process
+#### 4.5 Approval & Export
+- Section-level review and approval (Summary, Experience, Skills, Education)
+- Side-by-side diff of changes with accept/reject per section
+- Export to HTML and DOCX (PDF later)
 
-#### 4.6 Approval System
-- Individual CV review and approval
-- Bulk approval for multiple applications
-- Edit capabilities before final approval
-- Export functionality (PDF, DOC, etc.)
+#### 4.6 Billing & Limits (MVP)
+- Free tier with monthly quotas (e.g., 50 tailored generations)
+- Pro subscription via Stripe (e.g., 300–500 generations, multi-JD generation)
+- Per-user usage tracking and soft limits
 
 #### 4.7 AI Settings & Controls
-- Embellishment level settings (1-5 scale)
-- Conservative to aggressive optimization options
-- Transparency in AI modifications
-- User control over final content
+- Embellishment level (1–5)
+- Transparency: change summaries and rationale
+- Guardrails to prevent fabrication (no invented employers, dates, certs)
 
 ### 5. User Stories
 
@@ -77,57 +73,53 @@ Job seekers face significant challenges in tailoring their CVs for multiple job 
 - **As a user**, I want to export my optimized CVs so that I can submit applications
 - **As a user**, I want to track my application progress so that I stay organized
 
-### 6. Acceptance Criteria
+### 6. Acceptance Criteria (MVP)
 
-#### 6.1 CV Upload & Optimization
-- **Given** I have a CV file in PDF/DOC/DOCX format
-- **When** I upload it to the platform
-- **Then** AI analyzes and creates an optimized reference CV
-- **And** I can review the changes made
-- **And** The optimized CV is saved in my profile
+#### 6.1 CV Input & Optimization
+- **Given** I have a CV in DOCX/TXT format or pasted text
+- **When** I upload or paste it to the platform
+- **Then** AI analyzes and creates an optimized Reference CV
+- **And** I can view a change summary and rationale
+- **And** The Reference CV is saved in my profile
 
 #### 6.2 Job Description Processing
-- **Given** I have job posting URLs
-- **When** I add them to the platform (up to 20)
-- **Then** AI scrapes and analyzes each job description
+- **Given** I have job descriptions
+- **When** I paste the job descriptions (up to 5 at once in MVP)
+- **Then** AI analyzes each job description
 - **And** Extracts key requirements and keywords
-- **And** Stores them for CV optimization
+- **And** Stores them for CV generation
 
 #### 6.3 Tailored CV Generation
-- **Given** I have an optimized CV and job descriptions
-- **When** I initiate CV generation
-- **Then** AI creates tailored CVs for each position
+- **Given** I have a Reference CV and job descriptions
+- **When** I generate tailored CVs
+- **Then** AI creates tailored CVs for each position (sequentially)
 - **And** Highlights relevant experience and skills
 - **And** Matches JD requirements with CV content
 
-#### 6.4 Approval System
+#### 6.4 Approval & Export
 - **Given** AI has generated tailored CVs
 - **When** I review them
-- **Then** I can approve individually or in bulk
-- **And** I can make manual edits if needed
-- **And** I can export approved CVs
+- **Then** I can approve per section or edit content
+- **And** I can export approved CVs to HTML/DOCX
 
-### 7. Non-Functional Requirements
+### 7. Non-Functional Requirements (MVP)
 
 #### 7.1 Performance
-- CV processing time: < 2 minutes for initial optimization
-- JD processing time: < 1 minute per URL
-- Tailored CV generation: < 3 minutes per position
-- System uptime: 99.9% availability
+- CV optimization: < 2 minutes
+- JD analysis: < 1 minute per JD
+- Tailored generation: < 2 minutes per JD (sequential)
 - Response time: < 2 seconds for UI interactions
 
 #### 7.2 Security
-- GDPR compliance
-- Data encryption in transit and at rest
-- Secure file storage and handling
-- User authentication and authorization
-- Rate limiting and abuse prevention
+- Supabase Auth + Row Level Security (RLS)
+- Data encryption in transit and at rest (managed)
+- Storage policies for user-owned files
+- Secure headers (CSP, HSTS) and SSR protection
+- Rate limiting and abuse prevention (Upstash)
 
 #### 7.3 Scalability
-- Support for 10,000+ concurrent users
-- Handle 100,000+ CV uploads per month
-- Process 1,000,000+ job descriptions per month
-- Horizontal scaling capabilities
+- Vercel serverless + Supabase managed scaling
+- Sequential processing for MVP; background jobs later (Edge Functions)
 
 #### 7.4 Usability
 - Intuitive user interface
@@ -169,47 +161,52 @@ Job seekers face significant challenges in tailoring their CVs for multiple job 
 - Users will provide accurate information
 
 #### 9.2 Constraints
-- Limited to 20 job URLs per session
-- File size limits for CV uploads (10MB max)
-- Rate limiting for AI API calls
-- Budget constraints for AI service costs
-- Legal compliance requirements
+- No web scraping in MVP; pasted JDs only
+- 5 JDs per generation batch (MVP)
+- File size limit 5MB; DOCX/TXT only (MVP)
+- AI API call quotas per user; budget caps
+- Regional data residency (EU by default)
 
-### 10. Risks & Mitigation
+### 10. Risks & Mitigation (MVP)
 
 #### 10.1 Technical Risks
-- **AI API reliability**: Implement fallback mechanisms
-- **Web scraping failures**: Provide manual JD input option
-- **File parsing errors**: Support multiple formats and validation
-- **Performance issues**: Implement queue system and caching
+- **AI API reliability**: Retries with backoff; graceful degradation
+- **File parsing errors**: DOCX/TXT only; robust validation; paste fallback
+- **Performance issues**: Sequential processing; later Edge Functions if needed
+- **Export fidelity**: Start with HTML/DOCX; validate ATS-friendly structure
 
 #### 10.2 Business Risks
-- **User adoption**: Focus on user experience and value proposition
-- **Compliance issues**: Legal review and privacy-focused design
-- **Cost management**: Monitor AI usage and optimize prompts
-- **Competition**: Continuous innovation and feature development
+- **User adoption**: Clear value, frictionless onboarding, free tier
+- **Compliance**: Privacy-first design; Supabase EU region
+- **Cost management**: Quotas, token logging, model choice (4o-mini)
+- **Competition**: UX quality, transparency, ATS focus
 
 ### 11. Future Considerations
-- Application submission integration
-- ATS (Applicant Tracking System) optimization
-- Interview preparation features
-- Salary negotiation tools
-- Career path recommendations
+- Web scraping of JDs (respect TOS/robots.txt)
+- Cover letter generation
+- Bulk operations and automation
+- ATS partner integrations and scoring
 - Multi-language support
-- Integration with LinkedIn and other platforms
+- LinkedIn and job board integrations
+- Mobile app
 
-### 12. Out of Scope
-- Direct job application submission (Phase 1-3)
-- Interview scheduling functionality
-- Salary negotiation features
-- Multi-language support (initially)
-- Mobile application (web-only initially)
-- Real-time collaboration features
+### 12. Out of Scope (MVP)
+- Web scraping
+- Cover letters
+- Bulk generation and operations
 - Advanced analytics and reporting
+- Direct job application submission
+- Mobile application (web-only initially)
+- Real-time collaboration
+
+### 13. Pricing & Plans (Recommendation)
+- Beta: Invite-only free tier to validate UX and quality
+- Public launch: Free tier (e.g., 50 generations/month) + Pro subscription ($12–19/mo) with higher limits and export options
+- Usage logging for tokens/cost per user; soft caps and upgrade prompts
 
 ---
 
-**Version**: 1.0  
-**Date**: 2025-01-08  
-**Status**: Draft  
-**Next Review**: After stakeholder feedback
+**Version**: 1.1  
+**Date**: 2025-09-08  
+**Status**: Solo MVP  
+**Next Review**: After beta feedback

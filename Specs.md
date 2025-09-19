@@ -1,5 +1,16 @@
 # Technical Specifications
-## AI-Powered CV Optimization Platform
+## AI-Powered CV Optimization Platform — Solo MVP v1.1
+
+### 0. Solo MVP Overview (Authoritative for v1.1)
+- Architecture: Next.js 14 on Vercel + Supabase (Auth, Postgres with RLS, Storage)
+- AI: OpenAI (GPT‑4o‑mini default; GPT‑4o optional) with JSON schema outputs
+- Storage: Supabase Storage (DOCX/TXT only in MVP); presigned uploads
+- Processing: Synchronous, sequential per JD (no queues in MVP)
+- Job Descriptions: Paste-only (no web scraping in MVP)
+- Exports: HTML and DOCX; PDF later
+- Rate Limiting: Upstash Ratelimit; per-user quotas
+- Payments: Stripe subscriptions for Pro (optional post-MVP)
+- Observability: Sentry + Vercel logs; AI usage logged in DB
 
 ### 1. System Architecture
 
@@ -60,6 +71,107 @@ File Storage (AWS S3) → External APIs (OpenAI, Claude)
 - **Logging**: ELK Stack
 - **CDN**: CloudFront
 - **Storage**: AWS S3
+
+### 3. Database Schema (MVP Supabase)
+
+#### 3.1 Core Tables
+
+```sql
+-- profiles (linked to auth.users)
+create table if not exists public.profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  job_title text,
+  location text,
+  professional_summary text,
+  website_url text,
+  linkedin_url text,
+  github_url text,
+  portfolio_url text,
+  embellishment_level int2 default 3 check (embellishment_level between 1 and 5),
+  data_retention_days int2 default 90,
+  ai_training_consent boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- cvs
+create table if not exists public.cvs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text,
+  original_filename text,
+  docx_path text, -- Supabase Storage path (optional)
+  text_content text not null,
+  is_reference boolean default false,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- job_descriptions (pasted only in MVP)
+create table if not exists public.job_descriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text,
+  company text,
+  text_content text not null,
+  keywords jsonb,
+  created_at timestamptz default now()
+);
+
+-- generated_cvs (tailored outputs per JD)
+create table if not exists public.generated_cvs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  cv_id uuid not null references public.cvs(id) on delete cascade,
+  jd_id uuid not null references public.job_descriptions(id) on delete cascade,
+  tailored_text text not null,
+  optimization_notes jsonb,
+  match_score numeric(4,2),
+  status text default 'pending' check (status in ('pending','completed','approved','rejected')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- ai_runs (usage and cost tracking)
+create table if not exists public.ai_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  run_type text not null check (run_type in ('optimize_cv','analyze_jd','generate_tailored_cv')),
+  provider text not null default 'openai',
+  model text not null,
+  tokens_input int default 0,
+  tokens_output int default 0,
+  cost_usd numeric(8,4) default 0,
+  status text default 'success' check (status in ('success','failed')),
+  metadata jsonb,
+  created_at timestamptz default now()
+);
+```
+
+#### 3.2 Indexes & RLS Policies (examples)
+```sql
+create index if not exists idx_cvs_user on public.cvs(user_id, created_at desc);
+create index if not exists idx_jd_user on public.job_descriptions(user_id, created_at desc);
+create index if not exists idx_gc_user on public.generated_cvs(user_id, created_at desc);
+
+alter table public.profiles enable row level security;
+alter table public.cvs enable row level security;
+alter table public.job_descriptions enable row level security;
+alter table public.generated_cvs enable row level security;
+alter table public.ai_runs enable row level security;
+
+create policy profiles_owner on public.profiles
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy cvs_owner on public.cvs
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy jd_owner on public.job_descriptions
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy gc_owner on public.generated_cvs
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy ai_runs_owner on public.ai_runs
+  for select using (user_id = auth.uid());
+```
 
 ### 3. Database Schema
 
@@ -219,6 +331,50 @@ CREATE INDEX idx_processing_jobs_status ON processing_jobs(status);
 CREATE INDEX idx_user_sessions_token_hash ON user_sessions(token_hash);
 CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
 ```
+
+### 4. API Endpoints (MVP)
+
+#### 4.1 Authentication (Supabase)
+Managed by Supabase Auth (email/magic links). Next.js uses Supabase SSR helpers.
+
+#### 4.2 Profile & Settings
+```typescript
+// GET /api/profile
+// PUT /api/profile
+```
+
+#### 4.3 CV Management
+```typescript
+// POST /api/cv  // upload DOCX/TXT or paste text
+// GET  /api/cv
+// GET  /api/cv/:id
+// POST /api/cv/:id/optimize  // create/update Reference CV with change summary
+// PUT  /api/cv/:id/reference // toggle reference
+```
+
+#### 4.4 Job Descriptions (Paste only)
+```typescript
+// POST /api/jd  // items: [{ title?, company?, text }]
+// GET  /api/jd
+// GET  /api/jd/:id
+// DELETE /api/jd/:id
+```
+
+#### 4.5 CV Generation
+```typescript
+// POST /api/generate            // body: { referenceCvId, jobDescriptionIds[] (<=5) }
+// GET  /api/generated
+// GET  /api/generated/:id
+// PUT  /api/generated/:id/approve
+// PUT  /api/generated/:id/reject
+```
+
+#### 4.6 Export
+```typescript
+// POST /api/export/cv/:id       // format: 'html' | 'docx' | 'txt' (pdf later)
+```
+
+-- The detailed Phase 2+ API remains below for reference.
 
 ### 4. API Endpoints
 
@@ -901,8 +1057,7 @@ class FileProcessingService {
   
   private async extractTextFromFile(file: Express.Multer.File): Promise<string> {
     switch (file.mimetype) {
-      case 'application/pdf':
-        return await this.extractPDFText(file);
+      // PDF not supported in MVP
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         return await this.extractDocxText(file);
       case 'application/msword':
@@ -914,11 +1069,7 @@ class FileProcessingService {
     }
   }
   
-  private async extractPDFText(file: Express.Multer.File): Promise<string> {
-    const pdfParse = require('pdf-parse');
-    const data = await pdfParse(file.buffer);
-    return data.text;
-  }
+  // PDF extraction removed for MVP
   
   private async extractDocxText(file: Express.Multer.File): Promise<string> {
     const mammoth = require('mammoth');
@@ -969,6 +1120,11 @@ class WebScrapingService {
 }
 ```
 
+### 7. Processing Model (MVP)
+
+- Generation runs synchronously per JD within API requests (sequential loop; show progress in UI)
+- If needed later: Supabase Edge Functions + QStash for background jobs
+
 ### 7. Queue System
 
 #### 7.1 Bull Queue Configuration
@@ -1010,7 +1166,7 @@ jdExtractionQueue.process('extract', async (job) => {
 });
 ```
 
-### 8. Security Implementation
+### 8. Security Implementation (MVP)
 
 #### 8.1 Authentication Middleware
 
@@ -1056,13 +1212,17 @@ const userRegistrationSchema = z.object({
 
 const cvUploadSchema = z.object({
   file: z.object({
-    mimetype: z.enum(['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/plain']),
-    size: z.number().max(10 * 1024 * 1024, 'File size must be less than 10MB'),
+    mimetype: z.enum(['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']),
+    size: z.number().max(5 * 1024 * 1024, 'File size must be less than 5MB'),
   }),
 });
 
 const jobDescriptionSchema = z.object({
-  urls: z.array(z.string().url('Invalid URL')).max(20, 'Maximum 20 URLs allowed'),
+  items: z.array(z.object({
+    title: z.string().optional(),
+    company: z.string().optional(),
+    text: z.string().min(50, 'Please paste a full job description')
+  })).max(5, 'Maximum 5 job descriptions allowed in MVP'),
 });
 ```
 
@@ -1332,9 +1492,23 @@ const metricsMiddleware = (req: Request, res: Response, next: NextFunction) => {
 };
 ```
 
-### 12. Deployment Configuration
+### 12. Deployment Configuration (MVP)
 
-#### 12.1 Docker Configuration
+#### 12.1 Hosting
+- App: Vercel (Next.js)
+- Backend: Supabase (Auth, Postgres, Storage), region: EU (Frankfurt) recommended for GDPR default
+
+#### 12.2 Environment Variables
+- NEXT_PUBLIC_SUPABASE_URL, SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE (server-only)
+- OPENAI_API_KEY
+- UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN (rate limiting)
+- STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET (post-MVP if payments enabled)
+
+#### 12.3 Storage
+- Supabase Storage bucket: `cv-uploads` (DOCX/TXT only); RLS storage policies per user
+
+#### Optional: Docker Configuration (Phase 2)
 
 ```dockerfile
 # Dockerfile
@@ -1372,7 +1546,7 @@ EXPOSE 3000
 CMD ["npm", "start"]
 ```
 
-#### 12.2 Docker Compose
+#### Optional: Docker Compose (Phase 2)
 
 ```yaml
 # docker-compose.yml
@@ -1432,7 +1606,7 @@ volumes:
 
 ---
 
-**Version**: 1.0  
-**Date**: 2025-01-08  
-**Status**: Draft  
-**Next Review**: Technical team review and feedback
+**Version**: 1.1  
+**Date**: 2025-09-08  
+**Status**: Solo MVP  
+**Next Review**: After beta feedback

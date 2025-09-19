@@ -1,5 +1,19 @@
 # Security & Compliance Documentation
-## AI-Powered CV Optimization Platform
+## AI-Powered CV Optimization Platform — Solo MVP v1.1
+
+### 0. MVP Security Baseline (Authoritative for v1.1)
+- Identity: Supabase Auth (email/magic links); admin MFA via provider (optional)
+- Access Control: Strict Row Level Security (RLS) on all tables; storage bucket policies per-user
+- Data Residency: Supabase project in EU (Frankfurt) by default for GDPR alignment
+- Transport/At-Rest: TLS 1.2+; Supabase managed encryption at rest
+- App Security: Next.js security headers (CSP, HSTS, X-Frame-Options=DENY, Referrer-Policy), CSRF protection on mutations
+- File Handling: Allow-list DOCX/TXT only (max 5MB); content-type and magic-byte sniffing; no PDF parsing in MVP
+- Rate Limiting: Upstash Ratelimit on write endpoints; CAPTCHA on signup if abused
+- Logging: Sentry for errors; minimal PII in logs; AI usage stored in DB (`ai_runs`)
+- Privacy: Per-user data retention setting (default 90 days for CV artifacts); one-click export/delete
+- Secrets: Vercel env vars (server-only for service keys); no secrets in client bundles
+
+Note: The comprehensive framework below remains as long-term guidance. Items not reflected above are Phase 2+.
 
 ### 1. Security Overview
 This document outlines the comprehensive security framework, privacy policies, and compliance requirements for the AI-Powered CV Optimization Platform. Our security approach follows industry best practices and regulatory requirements to ensure the protection of user data and system integrity.
@@ -80,9 +94,11 @@ This document outlines the comprehensive security framework, privacy policies, a
 
 ### 4. Authentication & Authorization
 
+MVP override: Use Supabase Auth (email/magic links). Do not implement custom passwords or JWT flows. MFA optional for admin access only (Phase 2).
+
 #### 4.1 Authentication Requirements
 
-**Password Policy**
+**Password Policy** (Phase 2; not used with magic links in MVP)
 - Minimum length: 12 characters
 - Complexity: Must include uppercase, lowercase, numbers, and special characters
 - Password history: Prevent reuse of last 12 passwords
@@ -96,7 +112,7 @@ This document outlines the comprehensive security framework, privacy policies, a
 - Backup authentication methods available
 - Regular MFA method review
 
-**Session Management**
+**Session Management** (MVP via Supabase)
 - Session timeout: 30 minutes of inactivity
 - Secure session cookies with HttpOnly, Secure, and SameSite flags
 - Session token encryption
@@ -874,7 +890,7 @@ This document outlines the comprehensive security framework, privacy policies, a
 
 ---
 
-**Version**: 1.0  
-**Date**: 2025-01-08  
-**Status**: Draft  
-**Next Review**: Security team review and compliance validation
+**Version**: 1.1  
+**Date**: 2025-09-08  
+**Status**: Solo MVP  
+**Next Review**: After beta feedback and DPIA
