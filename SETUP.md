@@ -14,11 +14,12 @@ This guide sets up the managed backend and environment for development and deplo
 
 ## 3) Configure Auth
 - Enable email/magic-link authentication in Supabase Auth settings.
-- Set site URL (Vercel Preview URL for testing; update to production domain at launch).
+- Set site URL (Vercel preview URL for testing; update to production domain at launch).
 
 ## 4) Environment Variables
 - Copy `.env.example` to your local `.env` (for local dev) and to Vercel Project Settings → Environment Variables.
   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from Supabase → Project Settings → API
+  - `NEXT_PUBLIC_SITE_URL` (your deployed base URL, e.g., https://ai-cv-optimizer-five.vercel.app)
   - `SUPABASE_SERVICE_ROLE` (server-only, never exposed to client)
   - `OPENAI_API_KEY`
   - Optional: Upstash tokens for rate limiting; Stripe keys if enabling billing
