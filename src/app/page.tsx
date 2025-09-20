@@ -3,6 +3,8 @@ import { createClientForServerComponent } from '@/lib/supabase';
 import { SignInForm } from '@/components/auth/sign-in-form';
 import { SignOutForm } from '@/components/auth/sign-out-form';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const supabase = createClientForServerComponent();
   const {

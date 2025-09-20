@@ -4,6 +4,8 @@ import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
 import { ReferenceCvPanel } from './reference-cv-panel';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AppHome() {
   const supabase = createClientForServerComponent();
   const {
