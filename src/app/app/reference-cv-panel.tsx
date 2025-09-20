@@ -9,7 +9,7 @@ type OptimizedRow = Database['public']['Tables']['optimized_cvs']['Row'];
 const dmp = new diff_match_patch();
 
 const renderDiffHtml = (original: string, optimized: string) => {
-  const diffs = dmp.diff_main(original, optimized);
+  const diffs = dmp.diff_main(original, optimized) as Array<[number, string]>;
   dmp.diff_cleanupSemantic(diffs);
 
   return diffs
