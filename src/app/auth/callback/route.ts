@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
   const supabase = createClientForRouteHandler();
 
   if (code) {
+    console.log('Exchanging code for session');
     await supabase.auth.exchangeCodeForSession(code);
   }
 
   return NextResponse.redirect(`${url.origin}${next}`);
 }
-
