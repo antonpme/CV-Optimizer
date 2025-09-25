@@ -1,4 +1,4 @@
-import { createClientForServerComponent } from '@/lib/supabase';
+﻿import { createClientForServerComponent } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
@@ -7,6 +7,38 @@ import { JobSection } from '@/components/app/job-section';
 import { GeneratedCvSection } from '@/components/app/generated-cv-section';
 
 export const dynamic = 'force-dynamic';
+
+type SectionRow = Database['public']['Tables']['generated_cv_sections']['Row'];
+type ExportRow = Database['public']['Tables']['cv_exports']['Row'];
+
+type SectionsByCv = Record<string, SectionRow[]>;
+type ExportsByCv = Record<string, ExportRow[]>;
+
+function groupSections(sections: SectionRow[] | null | undefined): SectionsByCv {
+  if (!sections) {
+    return {};
+  }
+  return sections.reduce<SectionsByCv>((acc, section) => {
+    if (!acc[section.generated_cv_id]) {
+      acc[section.generated_cv_id] = [];
+    }
+    acc[section.generated_cv_id].push(section);
+    return acc;
+  }, {});
+}
+
+function groupExports(exportsList: ExportRow[] | null | undefined): ExportsByCv {
+  if (!exportsList) {
+    return {};
+  }
+  return exportsList.reduce<ExportsByCv>((acc, item) => {
+    if (!acc[item.generated_cv_id]) {
+      acc[item.generated_cv_id] = [];
+    }
+    acc[item.generated_cv_id].push(item);
+    return acc;
+  }, {});
+}
 
 export default async function AppHome() {
   const supabase = createClientForServerComponent();
@@ -58,6 +90,22 @@ export default async function AppHome() {
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false });
 
+  const { data: generatedSections } = await supabase
+    .from('generated_cv_sections')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('ordering', { ascending: true });
+
+  const { data: exportHistory } = await supabase
+    .from('cv_exports')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  const sectionsByCv = groupSections(generatedSections);
+  const exportsByCv = groupExports(exportHistory);
+
   return (
     <div className="space-y-10">
       <div className="space-y-1">
@@ -81,7 +129,12 @@ export default async function AppHome() {
 
       <JobSection jobs={jobDescriptions ?? []} hasReferenceCv={!!referenceCv} />
 
-      <GeneratedCvSection generated={generatedCvs ?? []} jobs={jobDescriptions ?? []} />
+      <GeneratedCvSection
+        generated={generatedCvs ?? []}
+        jobs={jobDescriptions ?? []}
+        sectionsByCv={sectionsByCv}
+        exportsByCv={exportsByCv}
+      />
     </div>
   );
 }

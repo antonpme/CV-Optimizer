@@ -5,6 +5,9 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 
 ## [Unreleased]
 - Refresh PRD.md, Specs.md, Security.md, and Design.md to match current Solo MVP scope (paste-only JDs, no cover letters, Next.js + Supabase stack)
+- Add section-level review flow (generated_cv_sections, approval server action, dashboard UI) (T5.1, T5.2)
+- Implement export service + history (/api/export/cv/[id], HTML/DOCX generation) (T5.3, T5.4)
+- Add docx dependency and Supabase schema updates for exports/sections
 - Update Tasks.md roadmap to emphasize Phase 5 approvals/exports and remove stale references
 - Housekeeping: normalize documentation formatting to ASCII-friendly characters and current dates
 

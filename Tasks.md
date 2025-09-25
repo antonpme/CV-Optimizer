@@ -1,4 +1,4 @@
-# Development Roadmap & Tasks
+﻿# Development Roadmap & Tasks
 ## AI-Powered CV Optimization Platform - Solo MVP v1.1
 
 ### Legend & Workflow
@@ -67,18 +67,18 @@
   Implementation: COMPLETE - Generated CV section lists tailored content, match score, and notes with expandable detail view.
 
 ### Phase 5 - Review & Export (Week 5)
-- [ ] `T5.1` Section diff & approval UI (Prereq: T4.4)
+- [x] `T5.1` Section diff & approval UI (Prereq: T4.4)
   Output: Side-by-side view with section-level accept/reject for Summary, Experience, Skills, Education.
-  Implementation: Pending.
-- [ ] `T5.2` Approval endpoints (`/api/generated/:id/approve|reject`) (Prereq: T4.2)
-  Output: Actions update status, record timestamps, and support manual edits before approval. RLS must protect approved records.
-  Implementation: Pending.
-- [ ] `T5.3` Export service (`/api/export/cv/:id`) (Prereq: T5.2)
+  Implementation: COMPLETE - Added `generated_cv_sections` table, per-section diff highlighting with `diff-match-patch`, editable final text area, and status badges within the dashboard review card.
+- [x] `T5.2` Approval endpoints (`/api/generated/:id/approve|reject`) (Prereq: T4.2)
+  Output: API updates status, records timestamps, and supports manual edits before approval.
+  Implementation: COMPLETE - Server action `reviewGeneratedSection` enforces session ownership, updates section/final text, recalculates parent CV status, and revalidates `/app`.
+- [x] `T5.3` Export service (`/api/export/cv/:id`) (Prereq: T5.2)
   Output: HTML and DOCX exports with ATS-safe templates and signed download URLs.
-  Implementation: Pending.
-- [ ] `T5.4` Export UI controls (Prereq: T5.3)
+  Implementation: COMPLETE - Added `/api/export/cv/[id]` route to assemble approved sections, generate HTML/Docx files, and log export history in `cv_exports`.
+- [x] `T5.4` Export UI controls (Prereq: T5.3)
   Output: Export modal with format selection, metadata toggles, and download history list.
-  Implementation: Pending.
+  Implementation: COMPLETE - Dashboard export controls expose HTML/DOCX downloads once sections are approved and surface recent export history per generated CV.
 
 ### Phase 6 - Hardening & UX Polish (Week 6)
 - [ ] `T6.1` Rate limiting & quotas (Prereq: T4.2)
@@ -120,5 +120,5 @@
 
 **Version**: 1.1  
 **Date**: 2025-09-25  
-**Status**: Solo MVP - Phase 5 next  
-**Next Review**: After Phase 5 scope update
+**Status**: Solo MVP - Phase 6 next  
+**Next Review**: After Phase 6 scope update

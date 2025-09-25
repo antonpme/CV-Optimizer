@@ -119,8 +119,16 @@ Respond with JSON like:
   };
 }
 
+const tailoredSectionSchema = z.object({
+  name: z.string(),
+  reference_section: z.string().min(1),
+  tailored_section: z.string().min(1),
+  rationale: z.string().optional(),
+});
+
 export const tailoredSchema = z.object({
   tailored_cv: z.string().min(1),
+  sections: z.array(tailoredSectionSchema).min(1),
   match_analysis: z
     .object({
       overall_match_score: z.number().min(0).max(1).optional(),
@@ -209,7 +217,15 @@ ${referenceCv}
 
 Respond in JSON with:
 {
-  "tailored_cv": "...",
+  "tailored_cv": "Full CV text in plain text",
+  "sections": [
+    {
+      "name": "Summary",
+      "reference_section": "Original summary text",
+      "tailored_section": "Tailored summary text",
+      "rationale": "Why the change helps"
+    }
+  ],
   "match_analysis": {
     "overall_match_score": 0.0-1.0,
     "key_matches": [{"requirement": "...", "candidate_fit": "...", "confidence": 0-1}],
@@ -220,7 +236,15 @@ Respond in JSON with:
     "keywords_added": ["keyword"],
     "achievements_highlighted": ["achievement"]
   }
-}`;
+}
+
+Rules for sections:
+- Cover the core CV groups (Summary/Profile, Experience, Skills, Education). Add Certifications or Projects if present.
+- Keep section ordering consistent with the tailored CV output.
+- The field reference_section must quote the relevant lines from the original CV (verbatim) for that section.
+- The field tailored_section must contain only the revised text for that section.
+- Always include at least Summary and Experience entries.
+`;
 
   const response = await fetch(OPENAI_CHAT_URL, {
     method: 'POST',
@@ -258,3 +282,5 @@ Respond in JSON with:
   const usage: OpenAIUsage | undefined = data?.usage;
   return { result: parsed.data, usage };
 }
+
+

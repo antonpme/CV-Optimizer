@@ -1,4 +1,4 @@
-// Placeholder Supabase type definitions.
+﻿// Simplified Supabase type definitions for Solo MVP v1.1.
 // Replace with generated types once the database schema stabilises.
 export type Json =
   | string
@@ -125,44 +125,6 @@ export type Database = {
           created_at?: string | null;
         };
       };
-      generated_cvs: {
-        Row: {
-          id: string;
-          user_id: string;
-          cv_id: string;
-          jd_id: string;
-          tailored_text: string;
-          optimization_notes: Json | null;
-          match_score: number | null;
-          status: string | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          cv_id: string;
-          jd_id: string;
-          tailored_text: string;
-          optimization_notes?: Json | null;
-          match_score?: number | null;
-          status?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          cv_id?: string;
-          jd_id?: string;
-          tailored_text?: string;
-          optimization_notes?: Json | null;
-          match_score?: number | null;
-          status?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-      };
       optimized_cvs: {
         Row: {
           id: string;
@@ -198,43 +160,154 @@ export type Database = {
           updated_at?: string | null;
         };
       };
+      generated_cvs: {
+        Row: {
+          id: string;
+          user_id: string;
+          cv_id: string;
+          jd_id: string;
+          tailored_text: string;
+          optimization_notes: Json | null;
+          match_score: number | null;
+          status: 'pending' | 'in_review' | 'approved' | 'rejected' | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          cv_id: string;
+          jd_id: string;
+          tailored_text: string;
+          optimization_notes?: Json | null;
+          match_score?: number | null;
+          status?: 'pending' | 'in_review' | 'approved' | 'rejected' | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          cv_id?: string;
+          jd_id?: string;
+          tailored_text?: string;
+          optimization_notes?: Json | null;
+          match_score?: number | null;
+          status?: 'pending' | 'in_review' | 'approved' | 'rejected' | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      generated_cv_sections: {
+        Row: {
+          id: string;
+          user_id: string;
+          generated_cv_id: string;
+          section_name: string;
+          original_text: string;
+          suggested_text: string;
+          final_text: string | null;
+          rationale: string | null;
+          status: 'pending' | 'approved' | 'rejected' | null;
+          ordering: number | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          generated_cv_id: string;
+          section_name: string;
+          original_text: string;
+          suggested_text: string;
+          final_text?: string | null;
+          rationale?: string | null;
+          status?: 'pending' | 'approved' | 'rejected' | null;
+          ordering?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          generated_cv_id?: string;
+          section_name?: string;
+          original_text?: string;
+          suggested_text?: string;
+          final_text?: string | null;
+          rationale?: string | null;
+          status?: 'pending' | 'approved' | 'rejected' | null;
+          ordering?: number | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      cv_exports: {
+        Row: {
+          id: string;
+          user_id: string;
+          generated_cv_id: string;
+          format: 'html' | 'docx';
+          status: 'completed' | 'failed';
+          notes: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          generated_cv_id: string;
+          format: 'html' | 'docx';
+          status?: 'completed' | 'failed';
+          notes?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          generated_cv_id?: string;
+          format?: 'html' | 'docx';
+          status?: 'completed' | 'failed';
+          notes?: string | null;
+          created_at?: string | null;
+        };
+      };
       ai_runs: {
         Row: {
           id: string;
           user_id: string;
-          run_type: string;
+          run_type: 'optimize_cv' | 'cv_generation';
           provider: string;
           model: string;
           tokens_input: number | null;
           tokens_output: number | null;
           cost_usd: number | null;
-          status: string | null;
+          status: 'success' | 'failed' | null;
           metadata: Json | null;
           created_at: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
-          run_type: string;
+          run_type: 'optimize_cv' | 'cv_generation';
           provider?: string;
           model: string;
           tokens_input?: number | null;
           tokens_output?: number | null;
           cost_usd?: number | null;
-          status?: string | null;
+          status?: 'success' | 'failed' | null;
           metadata?: Json | null;
           created_at?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
-          run_type?: string;
+          run_type?: 'optimize_cv' | 'cv_generation';
           provider?: string;
           model?: string;
           tokens_input?: number | null;
           tokens_output?: number | null;
           cost_usd?: number | null;
-          status?: string | null;
+          status?: 'success' | 'failed' | null;
           metadata?: Json | null;
           created_at?: string | null;
         };

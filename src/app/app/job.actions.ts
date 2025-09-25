@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -129,29 +129,33 @@ export async function generateTailoredCvs(
   } = await supabase.auth.getSession();
 
   if (!session) {
-    return { status: 'error', message: 'You must be signed in.' };
+    return {
+      status: 'error',
+      message: 'You must be signed in to generate tailored CVs.',
+    };
   }
 
   const parsed = generateSchema.safeParse({
-    job_ids: formData.getAll('job_ids') as string[],
-    embellishment_level: formData.get('embellishment_level') ?? 3,
+    job_ids: formData.getAll('job_ids').filter((id): id is string => typeof id === 'string'),
+    embellishment_level: formData.get('embellishment_level') ?? undefined,
   });
 
   if (!parsed.success) {
     return {
       status: 'error',
-      message: parsed.error.flatten().formErrors.join(' ') || 'Invalid selection.',
+      message: parsed.error.errors[0]?.message ?? 'Invalid generation request.',
     };
   }
 
-  const { job_ids: jobIds, embellishment_level: embellishment } = parsed.data;
+  const jobIds = parsed.data.job_ids;
+  const embellishment = parsed.data.embellishment_level;
 
   const { data: referenceCv, error: refError } = await supabase
     .from('cvs')
     .select('*')
     .eq('user_id', session.user.id)
     .eq('is_reference', true)
-    .single();
+    .maybeSingle();
 
   if (refError || !referenceCv) {
     return {
@@ -175,7 +179,7 @@ export async function generateTailoredCvs(
     .from('profiles')
     .select('*')
     .eq('user_id', session.user.id)
-    .single();
+    .maybeSingle();
 
   const { data: jobs, error: jobsError } = await supabase
     .from('job_descriptions')
@@ -212,19 +216,53 @@ export async function generateTailoredCvs(
         embellishmentLevel: embellishment,
       });
 
+      if (!result.sections.length) {
+        throw new Error('AI did not return section data for review.');
+      }
+
       const now = new Date().toISOString();
 
-      await supabase.from('generated_cvs').insert({
+      const { data: generatedCv, error: insertError } = await supabase
+        .from('generated_cvs')
+        .insert({
+          user_id: session.user.id,
+          cv_id: referenceCv.id,
+          jd_id: job.id,
+          tailored_text: result.tailored_cv,
+          optimization_notes: result.optimization_notes ?? null,
+          match_score: result.match_analysis?.overall_match_score ?? null,
+          status: 'in_review',
+          created_at: now,
+          updated_at: now,
+        })
+        .select('*')
+        .single();
+
+      if (insertError || !generatedCv) {
+        throw new Error(insertError?.message ?? 'Unable to store tailored CV.');
+      }
+
+      const sectionPayload = result.sections.map((section, index) => ({
         user_id: session.user.id,
-        cv_id: referenceCv.id,
-        jd_id: job.id,
-        tailored_text: result.tailored_cv,
-        optimization_notes: result.optimization_notes ?? null,
-        match_score: result.match_analysis?.overall_match_score ?? null,
-        status: 'completed',
+        generated_cv_id: generatedCv.id,
+        section_name: section.name,
+        original_text: section.reference_section,
+        suggested_text: section.tailored_section,
+        final_text: null,
+        rationale: section.rationale ?? null,
+        status: 'pending',
+        ordering: index,
         created_at: now,
         updated_at: now,
-      });
+      }));
+
+      const { error: sectionError } = await supabase
+        .from('generated_cv_sections')
+        .insert(sectionPayload);
+
+      if (sectionError) {
+        throw new Error(sectionError.message);
+      }
 
       await supabase.from('ai_runs').insert({
         user_id: session.user.id,
@@ -237,6 +275,7 @@ export async function generateTailoredCvs(
         metadata: {
           jd_id: job.id,
           match_analysis: result.match_analysis,
+          sections_count: result.sections.length,
         },
         created_at: now,
       });
