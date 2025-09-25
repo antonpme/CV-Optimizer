@@ -1,330 +1,87 @@
 # Design Document
-## AI-Powered CV Optimization Platform
+## AI-Powered CV Optimization Platform - Solo MVP v1.1
 
 ### 1. Design Philosophy
-**User-Centric AI Empowerment** - Create an intuitive, trustworthy interface that makes AI-powered CV optimization accessible while maintaining user control and transparency.
+Build a calm, confidence-inspiring workspace where solo job seekers can collaborate with AI while staying in control. Clarity, transparency, and focus trump visual flash.
 
-### 2. Design System
+### 2. System Foundations
+- **Framework**: Next.js App Router with Tailwind and shadcn/ui
+- **Grid**: 12-column responsive grid, 8 px spacing scale
+- **Color Palette**:
+  - Primary: #2563eb (blue)
+  - Secondary: #10b981 (green)
+  - Accent: #f59e0b (amber)
+  - Neutrals: #0f172a, #1f2937, #64748b, #f8fafc, #ffffff
+- **Typography**: Inter (UI + body), JetBrains Mono (code / structured diff)
+- **Iconography**: Lucide icons, simple outline style
 
-#### 2.1 Color Palette
-- **Primary**: #2563eb (Professional Blue)
-- **Secondary**: #10b981 (Success Green)
-- **Accent**: #f59e0b (Warning Amber)
-- **Neutral**: 
-  - #1f2937 (Dark Gray)
-  - #6b7280 (Medium Gray)
-  - #f3f4f6 (Light Gray)
-  - #ffffff (White)
+### 3. Core User Journeys (MVP)
+1. **Sign-in**: Landing -> email form -> magic link -> `/auth/callback` -> `/app`
+2. **Profile setup**: Complete profile card -> update embellishment level, links -> see confirmation toast
+3. **Reference CV**: Upload or paste CV -> view parsed text -> run AI optimization -> review change summary and confidence
+4. **Job intake**: Paste job description -> optional title/company -> save to list -> manage stored jobs (max 20)
+5. **Tailored generation**: Select reference CV + jobs -> choose embellishment level -> run generator -> review outputs per JD
+6. **Future (Phase 5)**: Section diff approval -> export to HTML/DOCX
 
-#### 2.2 Typography
-- **Primary Font**: Inter (Modern, clean, highly readable)
-- **Secondary Font**: JetBrains Mono (For code snippets and technical content)
-- **Font Sizes**:
-  - H1: 32px (Headings)
-  - H2: 24px (Subheadings)
-  - H3: 20px (Section titles)
-  - Body: 16px (Main content)
-  - Small: 14px (Captions, metadata)
-  - X-Small: 12px (Fine print)
+### 4. Screen Architecture
 
-#### 2.3 Components
-- **Buttons**: Rounded corners (8px), subtle shadows, hover states
-- **Cards**: White background, subtle borders, consistent padding
-- **Forms**: Clean layout, clear labels, inline validation
-- **Modals**: Overlay with backdrop, centered, scrollable content
-- **Progress Indicators**: Step-based, percentage-based, loading spinners
+#### 4.1 Landing Page (stub)
+- Hero: concise value prop, CTA button linking to sign-in
+- Secondary info: roadmap teaser, trust badges (placeholder until content ready)
 
-#### 2.4 Spacing & Layout
-- **Grid System**: 12-column responsive grid
-- **Spacing**: 8px base unit (8, 16, 24, 32, 48px)
-- **Max Width**: 1200px for main content areas
-- **Responsive**: Mobile-first approach, breakpoints at 768px, 1024px
+#### 4.2 Auth Pages
+- `/auth/sign-in`: centered card, email input, submit button, info about magic link timing
+- `/auth/callback`: spinner and status messages; redirects back home on success
 
-### 3. User Flow Diagrams
+#### 4.3 App Shell (`/app`)
+- **Top Bar**: Product logo, breadcrumb (static: Dashboard), user avatar w/ sign-out
+- **Page Layout**: Single column stack for Solo MVP to reduce cognitive load
+- **Section Pattern**: Headline + helper text + card with actions
 
-#### 3.1 Main User Journey
-```
-[User Registration] → [Profile Setup] → [CV Upload] → [CV Optimization] → 
-[Job URLs Input] → [JD Processing] → [CV Generation] → [Review & Approve] → 
-[Export & Apply]
-```
+Sections in order:
+1. **Profile**: Multi-column form inside card, Save button anchored bottom right, inline validation messages
+2. **Reference CV Panel**: Summary area showing latest optimization metadata, button group for Optimize / set embellishment level
+3. **CV Library**: Upload widget (drag/drop + browse), list of existing CVs with metadata chips (reference flag, created date)
+4. **Job Descriptions**: Add form (textarea + optional fields), list with accordion view for text preview, delete buttons
+5. **Tailored Results**: Generation form (checkbox list of JDs + embellishment slider), result cards with status badge, expandable detail view containing tailored text and match notes
 
-#### 3.2 Registration Flow
-```
-[Landing Page] → [Sign Up] → [Email Verification] → [Profile Creation] → 
-[Dashboard]
-```
+### 5. Interaction Patterns
+- **Forms**: use `useFormState`, show success toast + summary inline
+- **Progress**: Buttons show spinner while server action pending; generator displays status message (success/partial/error)
+- **Empty States**: Provide quick-start copy, e.g., CV library empty card with illustration placeholder
+- **Errors**: Inline field errors + toast with actionable guidance
+- **Focus order**: Logical top-to-bottom, ensuring keyboard navigation works without traps
 
-#### 3.3 CV Processing Flow
-```
-[Upload CV] → [File Validation] → [AI Analysis] → [Optimization Preview] → 
-[User Review] → [Save Reference CV]
-```
+### 6. Content Presentation
+- **Change Summaries**: Display bullet list of high-level adjustments, highlight confidence score with badge color (green >=0.7, yellow else)
+- **Tailored CV Text**: Render in monospace block with copy button; Phase 5 will add diff + inline approvals
+- **Job Cards**: Show extracted keywords as tokens (future enhancement); currently display trimmed job text with toggle for full view
 
-### 4. Wireframes & Screen Designs
+### 7. Accessibility & Inclusivity
+- WCAG 2.1 AA contrast ratios checked for primary palette
+- Focus ring uses Tailwind `ring-offset-2 ring-sky-500`
+- All interactive elements reachable via keyboard (tab order mirrors layout)
+- Provide descriptive aria labels for upload triggers and action buttons
+- Support reduced motion preference by disabling non-essential transitions
 
-#### 4.1 Landing Page
-- **Hero Section**: 
-  - Headline: "Transform Your CV for Every Job Application"
-  - Subheadline: "AI-powered optimization that gets you noticed"
-  - CTA: "Get Started Free"
-  - Background: Professional gradient with subtle tech pattern
+### 8. Responsive Considerations
+- **Mobile**: Stack sections with sticky CTA for uploads/generation; collapse navigation into menu icon
+- **Tablet**: Two-column layout for profile form and CV/job lists where space permits
+- **Desktop**: Standard single column with generous whitespace; future expansions can introduce secondary column for analytics
 
-- **Features Section**:
-  - 3-column grid highlighting key features
-  - Icons with short descriptions
-  - Focus on benefits, not just features
+### 9. Visual Assets & Future Enhancements
+- Illustrations: Plan for simple line art representing CV/job matching (Phase 6 polish)
+- Export Modal (Phase 5): overlay with format toggles, preview snippet, status badges
+- Approval UI (Phase 5): two-pane diff, section accordions with accept/reject buttons and rationale chips
 
-- **How It Works**:
-  - 4-step visual process
-  - Simple illustrations
-  - Clear progression indicators
-
-- **Social Proof**:
-  - Testimonials from beta users
-  - Success metrics
-  - Trust badges
-
-#### 4.2 Dashboard
-- **Layout**: Clean, card-based layout
-- **Main Sections**:
-  - **Header**: User profile, notifications, settings
-  - **Stats Overview**: CVs processed, applications pending, success rate
-  - **Quick Actions**: Upload CV, Add Jobs, Generate CVs
-  - **Recent Activity**: Timeline of recent actions
-  - **Progress Indicators**: Current processing status
-
-#### 4.3 Profile Setup
-- **Form Layout**: Multi-step wizard
-- **Sections**:
-  - **Personal Info**: Name, email, phone, location
-  - **Professional Summary**: Job title, experience level, industry
-  - **Social Links**: LinkedIn, GitHub, portfolio website, etc.
-  - **Preferences**: AI settings, notification preferences
-
-#### 4.4 CV Upload Interface
-- **Upload Area**:
-  - Drag-and-drop zone
-  - File browser option
-  - Supported formats listed
-  - File size indicator
-
-- **Upload Progress**:
-  - Visual progress bar
-  - Processing steps
-  - Estimated time remaining
-
-- **Upload Complete**:
-  - Preview of uploaded CV
-  - File details (size, format, pages)
-  - "Start Optimization" CTA
-
-#### 4.5 CV Optimization Preview
-- **Side-by-Side Comparison**:
-  - Original CV (left)
-  - Optimized CV (right)
-  - Highlighted changes
-  - Diff view option
-
-- **Change Summary**:
-  - List of improvements made
-  - Confidence score for each change
-  - Explanation of AI reasoning
-
-- **User Controls**:
-  - Accept/Reject individual changes
-  - Adjust optimization level
-  - Regenerate specific sections
-
-#### 4.6 Job URLs Input
-- **URL Input Interface**:
-  - Text area for multiple URLs (one per line)
-  - URL validation
-  - Character counter (max 20 URLs)
-
-- **URL Management**:
-  - List of added URLs with status
-  - Edit/delete individual URLs
-  - Batch operations
-
-- **Processing Status**:
-  - Real-time status updates
-  - Success/error indicators
-  - Retry failed URLs
-
-#### 4.7 CV Generation Dashboard
-- **Generation Queue**:
-  - List of jobs being processed
-  - Progress indicators for each
-  - Estimated completion times
-
-- **Generated CVs Grid**:
-  - Card layout for each generated CV
-  - Job title, company, status
-  - Quick actions (view, approve, edit)
-
-- **Bulk Operations**:
-  - Select multiple CVs
-  - Approve/reject in bulk
-  - Export selected
-
-#### 4.8 CV Review Interface
-- **Review Layout**:
-  - Generated CV preview
-  - Job requirements panel
-  - AI suggestions sidebar
-
-- **Review Tools**:
-  - Highlight matching keywords
-  - Show optimization rationale
-  - Compare with original CV
-
-- **Approval Options**:
-  - Approve as-is
-  - Approve with edits
-  - Request regeneration
-  - Reject
-
-#### 4.9 Export Options
-- **Export Formats**:
-  - PDF (recommended)
-  - DOC/DOCX
-  - Plain text
-  - HTML
-
-- **Export Settings**:
-  - Include/exclude metadata
-  - Template selection
-  - Branding options
-
-- **Download Management**:
-  - Download history
-  - Version tracking
-  - Re-download options
-
-#### 4.10 Settings Panel
-- **AI Settings**:
-  - Embellishment level slider (1-5)
-  - Industry-specific optimization
-  - Regional preferences
-
-- **Privacy Settings**:
-  - Data retention options
-  - AI training consent
-  - Profile visibility
-
-- **Notification Settings**:
-  - Email preferences
-  - In-app notifications
-  - Processing updates
-
-### 5. Interaction Design
-
-#### 5.1 Micro-interactions
-- **Button States**: Hover, active, disabled, loading
-- **Form Validation**: Real-time feedback, error messages
-- **Progress Animations**: Smooth transitions, loading spinners
-- **Tooltips**: Helpful hints on hover
-- **Toast Notifications**: Success/error feedback
-
-#### 5.2 Navigation Patterns
-- **Main Navigation**: Top navigation bar with dropdown menus
-- **Breadcrumb Navigation**: For multi-step processes
-- **Tab Navigation**: For organizing related content
-- **Wizard Navigation**: For multi-step forms
-
-#### 5.3 Responsive Design
-- **Mobile**: Single column, stacked layout, touch-friendly controls
-- **Tablet**: Two-column layout, optimized spacing
-- **Desktop**: Full multi-column layout, maximum information density
-
-### 6. Accessibility Considerations
-
-#### 6.1 WCAG 2.1 Compliance
-- **Keyboard Navigation**: Full keyboard accessibility
-- **Screen Reader Support**: ARIA labels, semantic HTML
-- **Color Contrast**: Minimum 4.5:1 for text, 3:1 for large text
-- **Focus Indicators**: Clear focus states for interactive elements
-- **Text Alternatives**: Alt text for images, captions for videos
-
-#### 6.2 Inclusive Design
-- **Language Support**: Clear, simple language
-- **Cultural Considerations**: Neutral imagery, inclusive examples
-- **Cognitive Accessibility**: Clear instructions, consistent patterns
-- **Motor Accessibility**: Large touch targets, generous click areas
-
-### 7. Visual Assets
-
-#### 7.1 Iconography
-- **Style**: Consistent line icons, 24px default size
-- **Categories**: Actions, status, navigation, features
-- **Custom Icons**: Branded icons for key features
-- **Icon Library**: Feather Icons base with custom additions
-
-#### 7.2 Illustrations
-- **Style**: Clean, minimalist, professional
-- **Usage**: Hero sections, empty states, onboarding
-- **Color Scheme**: Primary brand colors with gradients
-- **Customization**: Ability to change colors based on theme
-
-#### 7.3 Photography
-- **Style**: Professional, diverse, authentic
-- **Usage**: Testimonials, team page, marketing materials
-- **Guidelines**: Natural lighting, professional settings
-- **Licensing**: Royalty-free or custom photography
-
-### 8. Design Deliverables
-
-#### 8.1 High-Fidelity Mockups
-- All screens designed in Figma
-- Desktop, tablet, and mobile versions
-- Light and dark theme variations
-- Interactive prototypes for key flows
-
-#### 8.2 Design System Documentation
-- Component library with usage guidelines
-- Style guide with all design tokens
-- Interaction patterns and animations
-- Accessibility guidelines
-
-#### 8.3 Asset Preparation
-- Exported assets for development
-- SVG icons and illustrations
-- Image optimization and compression
-- Asset organization and naming conventions
-
-### 9. Design Validation
-
-#### 9.1 User Testing Plan
-- **Usability Testing**: 5-7 users per major flow
-- **A/B Testing**: Key conversion points
-- **Accessibility Testing**: Screen reader and keyboard navigation
-- **Performance Testing**: Load times and responsiveness
-
-#### 9.2 Success Metrics
-- Task completion rates
-- Time on task
-- User satisfaction scores
-- Error rates
-- Conversion rates
-
-### 10. Design Handoff
-
-#### 10.1 Developer Handoff
-- Figma file with all screens and components
-- Design system documentation
-- Interaction specifications
-- Asset exports and organization
-
-#### 10.2 Design Review Process
-- Weekly design reviews with development team
-- Implementation feedback sessions
-- Design QA during development
-- Final design sign-off before launch
+### 10. Deliverables & Handoff
+- Figma file (todo) capturing current flows and upcoming approval/export concepts
+- Component inventory document aligning shadcn/ui primitives with design tokens
+- QA checklist covering auth, uploads, generation, error states
 
 ---
 
-**Version**: 1.0  
-**Date**: 2025-01-08  
-**Status**: Draft  
-**Next Review**: Design team review and feedback
+**Version**: 1.1  
+**Date**: 2025-09-25  
+**Status**: Solo MVP - dashboard live, approval/export in design backlog  
+**Next Review**: After Phase 5 UI delivery
