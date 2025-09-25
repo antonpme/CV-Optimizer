@@ -31,7 +31,7 @@ This guide sets up the managed backend and environment for development and deplo
 ## 6) Next.js App (coming next)
 - We will scaffold Next.js 14 with Tailwind and shadcn/ui, add Supabase client (SSR helpers), and route handlers for:
   - `/api/cv`, `/api/cv/:id/optimize`, `/api/jd`, `/api/generate`, `/api/generated/:id`, `/api/export/cv/:id`.
-- Runtime dependencies added so far: `@supabase/*`, `zod` (form validation), `mammoth` (DOCX extraction), `diff-match-patch` (diff rendering).
+- Runtime dependencies added so far: `@supabase/*`, `zod` (form validation), `mammoth` (DOCX extraction), `diff-match-patch` (diff rendering), `@radix-ui/react-dropdown-menu` (UI primitives).
 
 ## 7) Changelog
 - After each iteration, append a short entry to `CHANGELOG.md` under Unreleased and reference relevant task IDs from `Tasks.md`.

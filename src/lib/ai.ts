@@ -119,3 +119,142 @@ Respond with JSON like:
   };
 }
 
+export const tailoredSchema = z.object({
+  tailored_cv: z.string().min(1),
+  match_analysis: z
+    .object({
+      overall_match_score: z.number().min(0).max(1).optional(),
+      key_matches: z
+        .array(
+          z.object({
+            requirement: z.string(),
+            candidate_fit: z.string(),
+            confidence: z.number().min(0).max(1).optional(),
+          }),
+        )
+        .default([]),
+      gaps_identified: z
+        .array(
+          z.object({
+            gap: z.string(),
+            mitigation: z.string(),
+          }),
+        )
+        .default([]),
+    })
+    .nullable()
+    .optional(),
+  optimization_notes: z
+    .object({
+      sections_enhanced: z.array(z.string()).default([]),
+      keywords_added: z.array(z.string()).default([]),
+      achievements_highlighted: z.array(z.string()).default([]),
+    })
+    .nullable()
+    .optional(),
+});
+
+export type TailoredResult = z.infer<typeof tailoredSchema>;
+
+export async function callTailoredCv({
+  model,
+  referenceCv,
+  jobDescription,
+  profile,
+  embellishmentLevel,
+}: {
+  model: string;
+  referenceCv: string;
+  jobDescription: {
+    title?: string | null;
+    company?: string | null;
+    text_content: string;
+  };
+  profile: {
+    full_name?: string | null;
+    job_title?: string | null;
+    professional_summary?: string | null;
+    industry?: string | null;
+  };
+  embellishmentLevel: number;
+}): Promise<{ result: TailoredResult; usage?: OpenAIUsage }> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not set');
+  }
+
+  const systemPrompt = `You are an expert resume writer specialising in tailoring CVs to specific job descriptions. Return only JSON matching the requested schema.`;
+
+  const userPrompt = `Tailor the candidate's CV for the job below while keeping all statements truthful. Avoid inventing employers, dates, certifications, or responsibilities.
+
+Embellishment level: ${embellishmentLevel}
+
+Candidate profile:
+Full name: ${profile.full_name ?? 'N/A'}
+Job title: ${profile.job_title ?? 'N/A'}
+Industry: ${profile.industry ?? 'N/A'}
+Professional summary: ${profile.professional_summary ?? 'N/A'}
+
+Job title: ${jobDescription.title ?? 'N/A'}
+Company: ${jobDescription.company ?? 'N/A'}
+Job description:
+"""
+${jobDescription.text_content}
+"""
+
+Reference CV:
+"""
+${referenceCv}
+"""
+
+Respond in JSON with:
+{
+  "tailored_cv": "...",
+  "match_analysis": {
+    "overall_match_score": 0.0-1.0,
+    "key_matches": [{"requirement": "...", "candidate_fit": "...", "confidence": 0-1}],
+    "gaps_identified": [{"gap": "...", "mitigation": "..."}]
+  },
+  "optimization_notes": {
+    "sections_enhanced": ["Experience"],
+    "keywords_added": ["keyword"],
+    "achievements_highlighted": ["achievement"]
+  }
+}`;
+
+  const response = await fetch(OPENAI_CHAT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.25,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI request failed: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  const messageContent: string | null = data?.choices?.[0]?.message?.content ?? null;
+  if (!messageContent) {
+    throw new Error('OpenAI response missing content');
+  }
+
+  const parsed = tailoredSchema.safeParse(JSON.parse(messageContent));
+  if (!parsed.success) {
+    throw new Error(`OpenAI tailored response could not be parsed: ${parsed.error.message}`);
+  }
+
+  const usage: OpenAIUsage | undefined = data?.usage;
+  return { result: parsed.data, usage };
+}

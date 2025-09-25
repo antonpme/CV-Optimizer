@@ -53,18 +53,18 @@
   Implementation: ✅ COMPLETE — Dashboard CV section with upload form, pasted text support, success/error messaging, and diff-enabled reference review panel.
 
 ### Phase 4 – JD Management & Tailored Generation (Week 4)
-- [ ] `T4.1` JD paste API (`/api/jd`) (Prereq: T2.2)
-  Output: Endpoint accepting up to 5 pasted descriptions, storing metadata/keywords; includes validation.
-  Implementation: Pending.
-- [ ] `T4.2` Tailored generation endpoint (`/api/generate`) (Prereq: T3.2, T4.1)
-  Output: Sequential generator mapping Reference CV + selected JDs to tailored outputs with progress.
-  Implementation: Pending.
-- [ ] `T4.3` JD management UI (Prereq: T4.1)
-  Output: JD list with add/delete, keyword highlights, and status indicators.
-  Implementation: Pending.
-- [ ] `T4.4` Tailored CV viewer (Prereq: T4.2)
-  Output: UI to inspect tailored CVs, match analysis, and generation history per JD.
-  Implementation: Pending.
+- [x] `T4.1` JD paste API (`/api/jd`) (Prereq: T2.2)
+    Output: Endpoint accepting up to 5 pasted descriptions, storing metadata/keywords; includes validation.
+    Implementation: ✅ COMPLETE — Server actions to add/delete job descriptions with validation, per-user caps, and dashboard revalidation.
+- [x] `T4.2` Tailored generation endpoint (`/api/generate`) (Prereq: T3.2, T4.1)
+    Output: Sequential generator mapping Reference CV + selected JDs to tailored outputs with progress.
+    Implementation: ✅ COMPLETE — `generateTailoredCvs` loops through selected JDs, calls OpenAI tailored prompt, stores output in `generated_cvs`, and logs usage/failures in `ai_runs`.
+- [x] `T4.3` JD management UI (Prereq: T4.1)
+    Output: JD list with add/delete, keyword highlights, and status indicators.
+    Implementation: ✅ COMPLETE — Job section provides add form, stored JD list with selection controls, and removal actions.
+- [x] `T4.4` Tailored CV viewer (Prereq: T4.2)
+    Output: UI to inspect tailored CVs, match analysis, and generation history per JD.
+    Implementation: ✅ COMPLETE — Generated CV section lists tailored content, match score, and optimisation notes with expandable detail view.
 
 ### Phase 5 – Review & Export (Week 5)
 - [ ] `T5.1` Section diff & approval UI (Prereq: T4.4)

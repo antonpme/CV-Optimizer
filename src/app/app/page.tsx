@@ -3,6 +3,8 @@ import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
 import { ReferenceCvPanel } from './reference-cv-panel';
+import { JobSection } from '@/components/app/job-section';
+import { GeneratedCvSection } from '@/components/app/generated-cv-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +46,18 @@ export default async function AppHome() {
     latestOptimization = optimized ?? null;
   }
 
+  const { data: jobDescriptions } = await supabase
+    .from('job_descriptions')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false });
+
+  const { data: generatedCvs } = await supabase
+    .from('generated_cvs')
+    .select('*')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false });
+
   return (
     <div className="space-y-10">
       <div className="space-y-1">
@@ -64,6 +78,10 @@ export default async function AppHome() {
         <h2 className="text-lg font-semibold text-slate-900">CV Library</h2>
         <CvSection cvs={cvs ?? []} />
       </div>
+
+      <JobSection jobs={jobDescriptions ?? []} hasReferenceCv={!!referenceCv} />
+
+      <GeneratedCvSection generated={generatedCvs ?? []} jobs={jobDescriptions ?? []} />
     </div>
   );
 }

@@ -13,6 +13,8 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - CV upload workflow (DOCX/TXT + pasted text) with Supabase Storage, reference toggle, and UI listing (T3.1)
 - Reference CV optimisation flow (OpenAI JSON schema, `optimized_cvs` storage, diff preview) (T3.2)
 - AI gateway helper (`lib/ai.ts`) with chat completion wrapper and usage logging (T3.3)
+- Job description intake + management UI (T4.1, T4.3)
+- Tailored CV generation endpoint and dashboard section with expandable results (T4.2, T4.4)
 
 ## [1.1] - 2025-09-08
 ### Added

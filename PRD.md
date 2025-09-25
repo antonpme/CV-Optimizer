@@ -37,6 +37,7 @@ Job seekers face significant challenges in tailoring their CVs for multiple job 
 - Paste job description text (no web scraping in MVP)
 - JD parsing and requirement analysis
 - Keyword extraction and categorization
+- Store up to 20 roles, manage selections, and trigger tailored CV generation per job
 
 #### 4.4 AI-Powered CV Generation
 - Tailored CV creation per pasted JD

@@ -603,6 +603,8 @@ interface AddJobDescriptionsResponse {
   }>;
 }
 
+_Implementation (MVP) uses server action `addJobDescription` to persist pasted text with optional title/company, enforcing 20-role limit per user._
+
 // GET /api/job-descriptions
 interface JobDescriptionsResponse {
   jobDescriptions: Array<{
@@ -657,6 +659,8 @@ interface GenerateCVsResponse {
     progress: number;
   }>;
 }
+
+_MVP implementation: server action `generateTailoredCvs` iterates selected job IDs, calls OpenAI tailored prompt, writes to `generated_cvs`, and records usage in `ai_runs`._
 
 // GET /api/generated-cvs
 interface GeneratedCVsResponse {
