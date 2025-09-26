@@ -1,4 +1,4 @@
-﻿# Development Roadmap & Tasks
+# Development Roadmap & Tasks
 ## AI-Powered CV Optimization Platform - Solo MVP v1.1
 
 ### Legend & Workflow
@@ -81,9 +81,9 @@
   Implementation: COMPLETE - Dashboard export controls expose HTML/DOCX downloads once sections are approved and surface recent export history per generated CV.
 
 ### Phase 6 - Hardening & UX Polish (Week 6)
-- [ ] `T6.1` Rate limiting & quotas (Prereq: T4.2)
+- [x] `T6.1` Rate limiting & quotas (Prereq: T4.2)
   Output: Upstash Ratelimit + per-user usage caps enforced on generation endpoints with friendly error states.
-  Implementation: Pending.
+  Implementation: COMPLETE - Added Upstash-backed rate limiter and monthly quota checks for reference optimization and tailored generation; surfaced user-friendly messages when limits trigger.
 - [ ] `T6.2` Security headers & CSP (Prereq: T1.3)
   Output: Strict CSP, HSTS, X-Frame-Options=DENY, Referrer-Policy configured in Next.js.
   Implementation: Pending.
@@ -122,3 +122,4 @@
 **Date**: 2025-09-25  
 **Status**: Solo MVP - Phase 6 next  
 **Next Review**: After Phase 6 scope update
+

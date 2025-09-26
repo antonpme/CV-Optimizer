@@ -8,6 +8,7 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Add section-level review flow (generated_cv_sections, approval server action, dashboard UI) (T5.1, T5.2)
 - Implement export service + history (/api/export/cv/[id], HTML/DOCX generation) (T5.3, T5.4)
 - Add docx dependency and Supabase schema updates for exports/sections
+- Add Upstash-backed rate limiting + monthly quotas for optimize/generate actions (T6.1)
 - Update Tasks.md roadmap to emphasize Phase 5 approvals/exports and remove stale references
 - Housekeeping: normalize documentation formatting to ASCII-friendly characters and current dates
 

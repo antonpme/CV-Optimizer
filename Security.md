@@ -9,7 +9,7 @@
 - **Secrets**: Managed via Vercel project settings (server-only for service role key, OpenAI, JWT secret).
 - **Logging**: `ai_runs` table tracks AI usage; Supabase + Vercel logs for infra visibility. No PII in logs beyond user IDs/emails.
 - **Privacy Controls**: Profile field `data_retention_days` defaults to 90; manual cleanup actions (delete CV/JD) available. Automated retention job is backlog.
-- **Outstanding Work (Phase 5/6)**: Section approval integrity checks, export signing, CSP/HSTS headers, Upstash rate limiting, Sentry instrumentation, automated retention, DSR tooling.
+- **Outstanding Work (Phase 5/6)**: Section approval integrity checks, export signing, CSP/HSTS headers, Sentry instrumentation, automated retention, DSR tooling.
 
 The remainder of this document frames ongoing governance. Items tagged *Phase 2+* are aspirational for post-MVP hardening.
 
@@ -80,5 +80,5 @@ The remainder of this document frames ongoing governance. Items tagged *Phase 2+
 
 **Version**: 1.1  
 **Date**: 2025-09-25  
-**Status**: Solo MVP - core safeguards live, hardening in phases 5-8  
-**Next Review**: After Phase 5 (section approval + export)
+**Status**: Solo MVP - safeguards + rate limiting live, remaining hardening in phases 6-8  
+**Next Review**: After completing Phase 6 (headers, telemetry, accessibility)

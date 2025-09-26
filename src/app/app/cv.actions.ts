@@ -3,6 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createClientForServerAction } from '@/lib/supabase';
+import { enforceCvOptimizationRateLimit, enforceMonthlyQuota } from '@/lib/rate-limit';
+
+const MONTHLY_OPTIMIZE_LIMIT = Number.parseInt(process.env.CV_OPTIMIZE_MONTHLY_LIMIT ?? '30', 10);
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = new Set([
@@ -243,6 +246,23 @@ export async function optimizeReferenceCv(
 
   const { cv_id: cvId, embellishment_level: embellishment } = parsed.data;
 
+  const rateLimitCheck = await enforceCvOptimizationRateLimit(session.user.id);
+  if (!rateLimitCheck.ok) {
+    return { status: 'error', message: rateLimitCheck.message };
+  }
+
+  const quotaCheck = await enforceMonthlyQuota({
+    supabase,
+    userId: session.user.id,
+    runType: 'optimize_cv',
+    limit: MONTHLY_OPTIMIZE_LIMIT,
+    pending: 1,
+    label: 'reference optimizations',
+  });
+  if (!quotaCheck.ok) {
+    return { status: 'error', message: quotaCheck.message };
+  }
+
   const { data: cv, error: cvError } = await supabase
     .from('cvs')
     .select('*')
@@ -351,3 +371,4 @@ export async function optimizeReferenceCv(
     };
   }
 }
+
