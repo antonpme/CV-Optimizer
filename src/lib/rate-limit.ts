@@ -64,10 +64,15 @@ const friendlyWaitMessage = (reset?: number) => {
   return `Please wait about ${minutes} minute${minutes === 1 ? "" : "s"} before trying again.`;
 };
 
-export async function enforceCvGenerationRateLimit(userId: string): Promise<RateLimitOutcome> {
+export async function enforceCvGenerationRateLimit(userId: string, supabase?: SupabaseTypedClient): Promise<RateLimitOutcome> {
   if (!generationLimiter) {
-    return { ok: true };
+  if (supabase) {
+    const windowSeconds = parseSeconds(process.env.CV_GENERATION_RATE_WINDOW, 60);
+    const limit = Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? '5', 10);
+    return dbWindowCheck({ supabase, userId, runType: 'cv_generation', limit, windowSeconds, label: 'generations' });
   }
+  return { ok: true };
+}
 
   const result = await generationLimiter.limit(userId);
   if (result.success) {
@@ -80,10 +85,15 @@ export async function enforceCvGenerationRateLimit(userId: string): Promise<Rate
   };
 }
 
-export async function enforceCvOptimizationRateLimit(userId: string): Promise<RateLimitOutcome> {
+export async function enforceCvOptimizationRateLimit(userId: string, supabase?: SupabaseTypedClient): Promise<RateLimitOutcome> {
   if (!optimizationLimiter) {
-    return { ok: true };
+  if (supabase) {
+    const windowSeconds = parseSeconds(process.env.CV_OPTIMIZE_RATE_WINDOW, 60);
+    const limit = Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? '8', 10);
+    return dbWindowCheck({ supabase, userId, runType: 'optimize_cv', limit, windowSeconds, label: 'optimizations' });
   }
+  return { ok: true };
+}
 
   const result = await optimizationLimiter.limit(userId);
   if (result.success) {
@@ -134,4 +144,40 @@ export async function enforceMonthlyQuota({
   }
 
   return { ok: true, remaining: limit - projected };
+}
+
+
+function parseSeconds(window: string | undefined, fallbackSeconds: number): number {
+  if (!window) return fallbackSeconds;
+  const t = window.trim().toLowerCase();
+  const m = t.match(/^(\d+)\s*m/);
+  if (m) return Math.max(1, parseInt(m[1], 10)) * 60;
+  const s = t.match(/^(\d+)\s*s?/);
+  if (s) return Math.max(1, parseInt(s[1], 10));
+  return fallbackSeconds;
+}
+
+async function dbWindowCheck(params: {
+  supabase: SupabaseTypedClient;
+  userId: string;
+  runType: 'cv_generation' | 'optimize_cv';
+  limit: number;
+  windowSeconds: number;
+  label: string;
+}): Promise<RateLimitOutcome> {
+  const { supabase, userId, runType, limit, windowSeconds, label } = params;
+  if (limit <= 0) return { ok: true };
+  const since = new Date(Date.now() - windowSeconds * 1000).toISOString();
+  const { count } = await supabase
+    .from('ai_runs')
+    .select('id', { head: true, count: 'exact' })
+    .eq('user_id', userId)
+    .eq('run_type', runType)
+    .eq('status', 'success')
+    .gte('created_at', since);
+  const used = count ?? 0;
+  if (used >= limit) {
+    return { ok: false, message: `Please wait a bit before more ${label}.` };
+  }
+  return { ok: true };
 }

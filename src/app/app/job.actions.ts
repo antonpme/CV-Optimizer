@@ -153,7 +153,7 @@ export async function generateTailoredCvs(
   const jobIds = parsed.data.job_ids;
   const embellishment = parsed.data.embellishment_level;
 
-  const rateLimitCheck = await enforceCvGenerationRateLimit(session.user.id);
+  const rateLimitCheck = await enforceCvGenerationRateLimit(session.user.id, supabase);
   if (!rateLimitCheck.ok) {
     return { status: 'error', message: rateLimitCheck.message };
   }
@@ -339,3 +339,4 @@ export async function generateTailoredCvs(
     message: `Generated ${successCount} tailored CV(s).`,
   };
 }
+

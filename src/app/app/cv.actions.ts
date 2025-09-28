@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -246,7 +246,7 @@ export async function optimizeReferenceCv(
 
   const { cv_id: cvId, embellishment_level: embellishment } = parsed.data;
 
-  const rateLimitCheck = await enforceCvOptimizationRateLimit(session.user.id);
+  const rateLimitCheck = await enforceCvOptimizationRateLimit(session.user.id, supabase);
   if (!rateLimitCheck.ok) {
     return { status: 'error', message: rateLimitCheck.message };
   }
@@ -371,4 +371,5 @@ export async function optimizeReferenceCv(
     };
   }
 }
+
 
