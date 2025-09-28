@@ -183,7 +183,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       });
     } else {
       const buffer = await buildDocxBuffer(finalSections, { title: jobMeta?.title, company: jobMeta?.company });
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+      const blob = new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       response = new NextResponse(blob, {
         status: 200,
         headers: {
