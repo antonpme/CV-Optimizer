@@ -2,9 +2,11 @@
 import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
+import { PlanUsageCard } from '@/components/app/plan-usage-card';
 import { ReferenceCvPanel } from './reference-cv-panel';
 import { JobSection } from '@/components/app/job-section';
 import { GeneratedCvSection } from '@/components/app/generated-cv-section';
+import { getUserLimits } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +51,32 @@ export default async function AppHome() {
   if (!session?.user) {
     return null;
   }
+
+  const limits = await getUserLimits(supabase, session.user.id);
+
+  const startOfMonth = new Date();
+  startOfMonth.setUTCDate(1);
+  startOfMonth.setUTCHours(0, 0, 0, 0);
+  const startOfMonthIso = startOfMonth.toISOString();
+
+  const { count: generationUsageCount } = await supabase
+    .from('ai_runs')
+    .select('id', { head: true, count: 'exact' })
+    .eq('user_id', session.user.id)
+    .eq('run_type', 'cv_generation')
+    .eq('status', 'success')
+    .gte('created_at', startOfMonthIso);
+
+  const { count: optimizationUsageCount } = await supabase
+    .from('ai_runs')
+    .select('id', { head: true, count: 'exact' })
+    .eq('user_id', session.user.id)
+    .eq('run_type', 'optimize_cv')
+    .eq('status', 'success')
+    .gte('created_at', startOfMonthIso);
+
+  const generationUsed = generationUsageCount ?? 0;
+  const optimizationUsed = optimizationUsageCount ?? 0;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -114,6 +142,11 @@ export default async function AppHome() {
           Keep this information current so AI optimizations stay accurate.
         </p>
       </div>
+      <PlanUsageCard
+        limits={limits}
+        generationUsed={generationUsed}
+        optimizationUsed={optimizationUsed}
+      />
       <ProfileForm key={formKey} initial={profile ?? null} />
 
       <ReferenceCvPanel
@@ -134,7 +167,12 @@ export default async function AppHome() {
         jobs={jobDescriptions ?? []}
         sectionsByCv={sectionsByCv}
         exportsByCv={exportsByCv}
+        allowExport={limits.allowExport}
       />
     </div>
   );
 }
+
+
+
+

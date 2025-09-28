@@ -43,6 +43,7 @@ type Props = {
   jobs: JobRow[];
   sectionsByCv: Record<string, SectionRow[]>;
   exportsByCv: Record<string, ExportRow[]>;
+  allowExport: boolean;
 };
 
 type Notes = {
@@ -179,7 +180,7 @@ function formatStatus(status: string | null): string {
   return status.replace("_", " ");
 }
 
-export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv }: Props) {
+export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv, allowExport }: Props) {
   const jobsMap = jobLookup(jobs);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -207,7 +208,7 @@ export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv 
           const statusBadge = statusStyles[item.status ?? "pending"] ?? "bg-slate-100 text-slate-700";
           const hasSections = sections.length > 0;
           const allSectionsApproved = hasSections ? sections.every((section) => section.status === "approved") : true;
-          const canExport = hasSections ? allSectionsApproved && item.status === "approved" : true;
+          const canExport = allowExport && (hasSections ? allSectionsApproved && item.status === "approved" : true);
 
           return (
             <article key={item.id} className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -283,8 +284,10 @@ export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv 
                           Download DOCX
                         </a>
                       </div>
-                    ) : (
+                    ) : allowExport ? (
                       <p className="text-xs text-slate-600">Approve all sections to enable export.</p>
+                    ) : (
+                      <p className="text-xs text-slate-600">Exports are available on upgraded plans.</p>
                     )}
                     {exports.length ? (
                       <ul className="space-y-1 text-xs text-slate-500">

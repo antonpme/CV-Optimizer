@@ -114,6 +114,21 @@ create table if not exists public.ai_runs (
   metadata jsonb,
   created_at timestamptz default now()
 );
+-- User entitlements (plan-based quotas)
+create table if not exists public.user_entitlements (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  plan text not null default 'free' check (plan in ('free','pro','custom')),
+  gen_rate_limit int default 5,
+  gen_window_seconds int default 60,
+  gen_monthly_limit int default 50,
+  opt_rate_limit int default 8,
+  opt_window_seconds int default 60,
+  opt_monthly_limit int default 30,
+  allow_export boolean default true,
+  expires_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
 
 -- Helpful indexes
 create index if not exists idx_cvs_user on public.cvs(user_id, created_at desc);
@@ -122,4 +137,6 @@ create index if not exists idx_gc_user on public.generated_cvs(user_id, created_
 create index if not exists idx_optimized_cvs_user on public.optimized_cvs(user_id, created_at desc);
 create index if not exists idx_sections_cv on public.generated_cv_sections(user_id, generated_cv_id, ordering);
 create index if not exists idx_exports_user on public.cv_exports(user_id, created_at desc);
+
+
 

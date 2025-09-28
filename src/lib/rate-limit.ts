@@ -1,4 +1,4 @@
-﻿import { Ratelimit } from "@upstash/ratelimit";
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { SupabaseTypedClient } from "@/lib/supabase";
 
@@ -15,17 +15,88 @@ type QuotaParams = {
   label: string;
 };
 
+type RateConfig = {
+  rateLimit: number;
+  windowSeconds: number;
+  monthlyLimit: number;
+};
+
+export type UserLimits = {
+  plan: string;
+  generation: RateConfig;
+  optimization: RateConfig;
+  allowExport: boolean;
+  expiresAt: string | null;
+};
+
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
-const parseWindow = (value: string | undefined, fallback: string) => {
+function parseWindowString(value: string | undefined, fallback: string): string {
   if (!value || !value.trim()) return fallback;
   return value;
-};
+}
 
-const createLimiter = (prefix: string, limit: number, window: string) => {
+function parseWindowToSeconds(value: string | undefined, fallbackSeconds: number): number {
+  if (!value || !value.trim()) return fallbackSeconds;
+  const trimmed = value.trim().toLowerCase();
+  const minutes = trimmed.match(/^(\d+)\s*m/);
+  if (minutes) return Math.max(1, parseInt(minutes[1], 10)) * 60;
+  const seconds = trimmed.match(/^(\d+)\s*s?/);
+  if (seconds) return Math.max(1, parseInt(seconds[1], 10));
+  return fallbackSeconds;
+}
+
+function parseIntOrFallback(value: number | null | undefined, fallback: number): number {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  return fallback;
+}
+
+function getEnvDefaults(): UserLimits {
+  const generationRate = Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? "5", 10);
+  const generationWindowSeconds = parseWindowToSeconds(process.env.CV_GENERATION_RATE_WINDOW, 60);
+  const generationMonthly = Number.parseInt(process.env.CV_GENERATION_MONTHLY_LIMIT ?? "50", 10);
+
+  const optimizationRate = Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? "8", 10);
+  const optimizationWindowSeconds = parseWindowToSeconds(process.env.CV_OPTIMIZE_RATE_WINDOW, 60);
+  const optimizationMonthly = Number.parseInt(process.env.CV_OPTIMIZE_MONTHLY_LIMIT ?? "30", 10);
+
+  return {
+    plan: "free",
+    generation: {
+      rateLimit: generationRate,
+      windowSeconds: generationWindowSeconds,
+      monthlyLimit: generationMonthly,
+    },
+    optimization: {
+      rateLimit: optimizationRate,
+      windowSeconds: optimizationWindowSeconds,
+      monthlyLimit: optimizationMonthly,
+    },
+    allowExport: true,
+    expiresAt: null,
+  };
+}
+
+const envDefaults = getEnvDefaults();
+
+const generationLimiter = createLimiter(
+  "cv-generation",
+  envDefaults.generation.rateLimit,
+  parseWindowString(process.env.CV_GENERATION_RATE_WINDOW, "1 m"),
+);
+
+const optimizationLimiter = createLimiter(
+  "cv-optimization",
+  envDefaults.optimization.rateLimit,
+  parseWindowString(process.env.CV_OPTIMIZE_RATE_WINDOW, "1 m"),
+);
+
+function createLimiter(prefix: string, limit: number, window: string) {
   if (!redis || !limit || limit <= 0) return null;
   return new Ratelimit({
     redis,
@@ -33,21 +104,9 @@ const createLimiter = (prefix: string, limit: number, window: string) => {
     analytics: true,
     prefix,
   });
-};
+}
 
-const generationLimiter = createLimiter(
-  "cv-generation",
-  Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? "5", 10),
-  parseWindow(process.env.CV_GENERATION_RATE_WINDOW, "1 m"),
-);
-
-const optimizationLimiter = createLimiter(
-  "cv-optimization",
-  Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? "8", 10),
-  parseWindow(process.env.CV_OPTIMIZE_RATE_WINDOW, "1 m"),
-);
-
-const friendlyWaitMessage = (reset?: number) => {
+function friendlyWaitMessage(reset?: number) {
   if (!reset) {
     return "Too many requests. Please wait a moment before trying again.";
   }
@@ -62,48 +121,132 @@ const friendlyWaitMessage = (reset?: number) => {
 
   const minutes = Math.ceil(seconds / 60);
   return `Please wait about ${minutes} minute${minutes === 1 ? "" : "s"} before trying again.`;
-};
-
-export async function enforceCvGenerationRateLimit(userId: string, supabase?: SupabaseTypedClient): Promise<RateLimitOutcome> {
-  if (!generationLimiter) {
-  if (supabase) {
-    const windowSeconds = parseSeconds(process.env.CV_GENERATION_RATE_WINDOW, 60);
-    const limit = Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? '5', 10);
-    return dbWindowCheck({ supabase, userId, runType: 'cv_generation', limit, windowSeconds, label: 'generations' });
-  }
-  return { ok: true };
 }
 
-  const result = await generationLimiter.limit(userId);
-  if (result.success) {
-    return { ok: true };
+export async function getUserLimits(
+  supabase: SupabaseTypedClient,
+  userId: string,
+): Promise<UserLimits> {
+  const defaults = envDefaults;
+  const { data } = await supabase
+    .from("user_entitlements")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!data) {
+    return defaults;
   }
 
   return {
-    ok: false,
-    message: friendlyWaitMessage(result.reset),
+    plan: data.plan ?? defaults.plan,
+    generation: {
+      rateLimit: parseIntOrFallback(data.gen_rate_limit, defaults.generation.rateLimit),
+      windowSeconds: parseIntOrFallback(data.gen_window_seconds, defaults.generation.windowSeconds),
+      monthlyLimit: parseIntOrFallback(data.gen_monthly_limit, defaults.generation.monthlyLimit),
+    },
+    optimization: {
+      rateLimit: parseIntOrFallback(data.opt_rate_limit, defaults.optimization.rateLimit),
+      windowSeconds: parseIntOrFallback(data.opt_window_seconds, defaults.optimization.windowSeconds),
+      monthlyLimit: parseIntOrFallback(data.opt_monthly_limit, defaults.optimization.monthlyLimit),
+    },
+    allowExport: data.allow_export ?? defaults.allowExport,
+    expiresAt: data.expires_at ?? null,
   };
 }
 
-export async function enforceCvOptimizationRateLimit(userId: string, supabase?: SupabaseTypedClient): Promise<RateLimitOutcome> {
-  if (!optimizationLimiter) {
-  if (supabase) {
-    const windowSeconds = parseSeconds(process.env.CV_OPTIMIZE_RATE_WINDOW, 60);
-    const limit = Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? '8', 10);
-    return dbWindowCheck({ supabase, userId, runType: 'optimize_cv', limit, windowSeconds, label: 'optimizations' });
-  }
-  return { ok: true };
-}
+export async function enforceCvGenerationRateLimit(
+  userId: string,
+  supabase?: SupabaseTypedClient,
+  limits?: UserLimits,
+): Promise<RateLimitOutcome> {
+  const defaults = envDefaults;
+  let config = defaults.generation;
+  let allowUpstash = true;
+  let resolvedLimits = limits;
 
-  const result = await optimizationLimiter.limit(userId);
-  if (result.success) {
+  if (!resolvedLimits && supabase) {
+    resolvedLimits = await getUserLimits(supabase, userId);
+  }
+
+  if (resolvedLimits) {
+    config = resolvedLimits.generation;
+    allowUpstash =
+      config.rateLimit === defaults.generation.rateLimit &&
+      config.windowSeconds === defaults.generation.windowSeconds;
+  }
+
+  if (config.rateLimit <= 0) {
     return { ok: true };
   }
 
-  return {
-    ok: false,
-    message: friendlyWaitMessage(result.reset),
-  };
+  if (generationLimiter && allowUpstash) {
+    const result = await generationLimiter.limit(userId);
+    if (result.success) {
+      return { ok: true };
+    }
+    return { ok: false, message: friendlyWaitMessage(result.reset) };
+  }
+
+  if (supabase) {
+    return dbWindowCheck({
+      supabase,
+      userId,
+      runType: "cv_generation",
+      limit: config.rateLimit,
+      windowSeconds: config.windowSeconds,
+      label: "generations",
+    });
+  }
+
+  return { ok: true };
+}
+
+export async function enforceCvOptimizationRateLimit(
+  userId: string,
+  supabase?: SupabaseTypedClient,
+  limits?: UserLimits,
+): Promise<RateLimitOutcome> {
+  const defaults = envDefaults;
+  let config = defaults.optimization;
+  let allowUpstash = true;
+  let resolvedLimits = limits;
+
+  if (!resolvedLimits && supabase) {
+    resolvedLimits = await getUserLimits(supabase, userId);
+  }
+
+  if (resolvedLimits) {
+    config = resolvedLimits.optimization;
+    allowUpstash =
+      config.rateLimit === defaults.optimization.rateLimit &&
+      config.windowSeconds === defaults.optimization.windowSeconds;
+  }
+
+  if (config.rateLimit <= 0) {
+    return { ok: true };
+  }
+
+  if (optimizationLimiter && allowUpstash) {
+    const result = await optimizationLimiter.limit(userId);
+    if (result.success) {
+      return { ok: true };
+    }
+    return { ok: false, message: friendlyWaitMessage(result.reset) };
+  }
+
+  if (supabase) {
+    return dbWindowCheck({
+      supabase,
+      userId,
+      runType: "optimize_cv",
+      limit: config.rateLimit,
+      windowSeconds: config.windowSeconds,
+      label: "optimizations",
+    });
+  }
+
+  return { ok: true };
 }
 
 export async function enforceMonthlyQuota({
@@ -146,38 +289,28 @@ export async function enforceMonthlyQuota({
   return { ok: true, remaining: limit - projected };
 }
 
-
-function parseSeconds(window: string | undefined, fallbackSeconds: number): number {
-  if (!window) return fallbackSeconds;
-  const t = window.trim().toLowerCase();
-  const m = t.match(/^(\d+)\s*m/);
-  if (m) return Math.max(1, parseInt(m[1], 10)) * 60;
-  const s = t.match(/^(\d+)\s*s?/);
-  if (s) return Math.max(1, parseInt(s[1], 10));
-  return fallbackSeconds;
-}
-
 async function dbWindowCheck(params: {
   supabase: SupabaseTypedClient;
   userId: string;
-  runType: 'cv_generation' | 'optimize_cv';
+  runType: "cv_generation" | "optimize_cv";
   limit: number;
   windowSeconds: number;
   label: string;
 }): Promise<RateLimitOutcome> {
   const { supabase, userId, runType, limit, windowSeconds, label } = params;
-  if (limit <= 0) return { ok: true };
   const since = new Date(Date.now() - windowSeconds * 1000).toISOString();
   const { count } = await supabase
-    .from('ai_runs')
-    .select('id', { head: true, count: 'exact' })
-    .eq('user_id', userId)
-    .eq('run_type', runType)
-    .eq('status', 'success')
-    .gte('created_at', since);
+    .from("ai_runs")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", userId)
+    .eq("run_type", runType)
+    .eq("status", "success")
+    .gte("created_at", since);
+
   const used = count ?? 0;
   if (used >= limit) {
     return { ok: false, message: `Please wait a bit before more ${label}.` };
   }
+
   return { ok: true };
 }

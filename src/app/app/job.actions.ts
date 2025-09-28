@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createClientForServerAction } from '@/lib/supabase';
 import { callTailoredCv } from '@/lib/ai';
-import { enforceCvGenerationRateLimit, enforceMonthlyQuota } from '@/lib/rate-limit';
+import { enforceCvGenerationRateLimit, enforceMonthlyQuota, getUserLimits } from '@/lib/rate-limit';
 
 export type JobActionState = {
   status: 'idle' | 'success' | 'error';
@@ -110,8 +110,6 @@ export async function deleteJobDescription(id: string) {
   revalidatePath('/app');
 }
 
-const MONTHLY_GENERATION_LIMIT = Number.parseInt(process.env.CV_GENERATION_MONTHLY_LIMIT ?? '50', 10);
-
 const generateSchema = z.object({
   job_ids: z.array(z.string().uuid()).min(1, 'Select at least one job description.').max(5),
   embellishment_level: z.coerce.number().int().min(1).max(5).default(3),
@@ -153,7 +151,9 @@ export async function generateTailoredCvs(
   const jobIds = parsed.data.job_ids;
   const embellishment = parsed.data.embellishment_level;
 
-  const rateLimitCheck = await enforceCvGenerationRateLimit(session.user.id, supabase);
+  const limits = await getUserLimits(supabase, session.user.id);
+
+  const rateLimitCheck = await enforceCvGenerationRateLimit(session.user.id, supabase, limits);
   if (!rateLimitCheck.ok) {
     return { status: 'error', message: rateLimitCheck.message };
   }
@@ -162,6 +162,7 @@ export async function generateTailoredCvs(
     supabase,
     userId: session.user.id,
     runType: 'cv_generation',
+    limit: limits.generation.monthlyLimit,
     limit: MONTHLY_GENERATION_LIMIT,
     pending: jobIds.length,
     label: 'tailored CV generations',

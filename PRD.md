@@ -49,6 +49,7 @@ Job seekers struggle to customize their CVs quickly and confidently for multiple
 
 #### 4.6 Billing & Limits (Deferred)
 - Free tier quotas + Stripe Pro subscription deferred until post-MVP validation
+- Supabase `user_entitlements` table tracks per-user limits (free vs future paid tiers) so billing can flip on easily
 
 ### 5. User Stories (Active Scope)
 

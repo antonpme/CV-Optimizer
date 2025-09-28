@@ -58,6 +58,7 @@ OpenAI APIs (GPT-4o mini)
 - `optimized_cvs`: AI-optimized reference outputs with rationale (Phase 3)
 - `job_descriptions`: pasted JD text + metadata (20 per user cap)
 - `generated_cvs`: tailored CV outputs with notes and match score
+- `user_entitlements`: per-user plan configuration (plan name, per-minute/monthly limits, export flag)
 - `ai_runs`: provider usage logs for cost/telemetry
 
 #### 3.2 Row Level Security

@@ -23,17 +23,23 @@ This guide sets up the managed backend and environment for development and deplo
   - `SUPABASE_SERVICE_ROLE` (server-only, never exposed to client)
   - `OPENAI_API_KEY`
   - Optional: Upstash tokens for rate limiting; Stripe keys if enabling billing
+- Optional overrides: `CV_GENERATION_RATE_LIMIT`, `CV_GENERATION_RATE_WINDOW`, `CV_GENERATION_MONTHLY_LIMIT`, `CV_OPTIMIZE_RATE_LIMIT`, `CV_OPTIMIZE_RATE_WINDOW`, `CV_OPTIMIZE_MONTHLY_LIMIT` (set to `0` for unlimited)
 
 ## 5) Storage
 - Bucket `cv-uploads` is created by `supabase/storage.sql`.
 - Client uploads should set `x-upsert: true` and will auto-assign `owner = auth.uid()`.
 
 ## 6) Next.js App (coming next)
+
+## 7) Plans & quotas
+- After deploying, use the Plan & Usage card on `/app` to switch between Free and Pro presets (dev helper).
+- All per-user limits live in the Supabase `user_entitlements` table; defaults mirror the free tier.
+
 - We will scaffold Next.js 14 with Tailwind and shadcn/ui, add Supabase client (SSR helpers), and route handlers for:
   - `/api/cv`, `/api/cv/:id/optimize`, `/api/jd`, `/api/generate`, `/api/generated/:id`, `/api/export/cv/:id`.
 - Runtime dependencies added so far: `@supabase/*`, `zod` (form validation), `mammoth` (DOCX extraction), `diff-match-patch` (diff rendering), `@radix-ui/react-dropdown-menu` (UI primitives).
 
-## 7) Changelog
+## 8) Changelog
 - After each iteration, append a short entry to `CHANGELOG.md` under Unreleased and reference relevant task IDs from `Tasks.md`.
 
 ---

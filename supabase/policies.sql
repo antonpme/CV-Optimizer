@@ -9,6 +9,7 @@ alter table public.generated_cv_sections enable row level security;
 alter table public.cv_exports enable row level security;
 alter table public.ai_runs enable row level security;
 alter table public.optimized_cvs enable row level security;
+alter table public.user_entitlements enable row level security;
 
 -- Profiles owner policy
 drop policy if exists profiles_owner on public.profiles;
@@ -53,3 +54,9 @@ create policy ai_runs_owner_insert on public.ai_runs
 drop policy if exists optimized_cvs_owner on public.optimized_cvs;
 create policy optimized_cvs_owner on public.optimized_cvs
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- User Entitlements owner policy
+drop policy if exists user_entitlements_owner on public.user_entitlements;
+create policy user_entitlements_owner on public.user_entitlements
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+

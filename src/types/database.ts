@@ -271,6 +271,50 @@ export type Database = {
           created_at?: string | null;
         };
       };
+      user_entitlements: {
+        Row: {
+          user_id: string;
+          plan: string;
+          gen_rate_limit: number | null;
+          gen_window_seconds: number | null;
+          gen_monthly_limit: number | null;
+          opt_rate_limit: number | null;
+          opt_window_seconds: number | null;
+          opt_monthly_limit: number | null;
+          allow_export: boolean | null;
+          expires_at: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          plan?: string;
+          gen_rate_limit?: number | null;
+          gen_window_seconds?: number | null;
+          gen_monthly_limit?: number | null;
+          opt_rate_limit?: number | null;
+          opt_window_seconds?: number | null;
+          opt_monthly_limit?: number | null;
+          allow_export?: boolean | null;
+          expires_at?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          plan?: string;
+          gen_rate_limit?: number | null;
+          gen_window_seconds?: number | null;
+          gen_monthly_limit?: number | null;
+          opt_rate_limit?: number | null;
+          opt_window_seconds?: number | null;
+          opt_monthly_limit?: number | null;
+          allow_export?: boolean | null;
+          expires_at?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
       ai_runs: {
         Row: {
           id: string;

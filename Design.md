@@ -39,6 +39,7 @@ Build a calm, confidence-inspiring workspace where solo job seekers can collabor
 - **Section Pattern**: Headline + helper text + card with actions
 
 Sections in order:
+0. **Plan & Usage**: Card showing current plan, monthly usage bars, and dev-only plan toggle.
 1. **Profile**: Multi-column form inside card, Save button anchored bottom right, inline validation messages
 2. **Reference CV Panel**: Summary area showing latest optimization metadata, button group for Optimize / set embellishment level
 3. **CV Library**: Upload widget (drag/drop + browse), list of existing CVs with metadata chips (reference flag, created date)
