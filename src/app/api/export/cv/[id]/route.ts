@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/lib/supabase';
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 
@@ -9,12 +9,6 @@ type ExportFormat = (typeof allowedFormats)[number];
 type SectionPayload = {
   name: string;
   text: string;
-};
-
-type RouteParams = {
-  params: {
-    id: string;
-  };
 };
 
 const slugify = (value: string, fallback: string) => {
@@ -35,7 +29,7 @@ const buildHtml = (sections: SectionPayload[], meta: { title?: string | null; co
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
       const safeContent = section.text
-        .split('\n')
+        .split(/\r?\n/)
         .map((line) =>
           line
             .replace(/&/g, '&amp;')
@@ -76,7 +70,7 @@ const buildDocxBuffer = async (sections: SectionPayload[], meta: { title?: strin
       return;
     }
 
-    section.text.split('\n').forEach((line) => {
+    section.text.split(/\r?\n/).forEach((line) => {
       if (line.trim().length === 0) {
         children.push(new Paragraph(''));
       } else {
@@ -102,7 +96,7 @@ const buildDocxBuffer = async (sections: SectionPayload[], meta: { title?: strin
   return buffer;
 };
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const supabase = createClientForRouteHandler();
   const {
     data: { session },
@@ -117,10 +111,12 @@ export async function GET(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unsupported export format.' }, { status: 400 });
   }
 
+  const { id } = await context.params;
+
   const { data: generatedCv, error: cvError } = await supabase
     .from('generated_cvs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', session.user.id)
     .maybeSingle();
 
