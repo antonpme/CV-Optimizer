@@ -218,7 +218,7 @@ export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv,
                     {job?.title ?? "Untitled role"}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {job?.company ? `${job.company} · ` : ""}
+                    {job?.company ? `${job.company} - ` : ""}
                     Generated {item.created_at ? new Date(item.created_at).toLocaleString() : "recently"}
                   </p>
                   {item.match_score !== null && (
@@ -293,7 +293,7 @@ export function GeneratedCvSection({ generated, jobs, sectionsByCv, exportsByCv,
                       <ul className="space-y-1 text-xs text-slate-500">
                         {exports.slice(0, 3).map((entry) => (
                           <li key={entry.id}>
-                            {entry.format.toUpperCase()} · {entry.created_at ? new Date(entry.created_at).toLocaleString() : "n/a"} · {entry.status}
+                            {entry.format.toUpperCase()} - {entry.created_at ? new Date(entry.created_at).toLocaleString() : "n/a"} - {entry.status}
                           </li>
                         ))}
                       </ul>

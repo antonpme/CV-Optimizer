@@ -55,10 +55,10 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
           <h2 className="text-lg font-semibold text-slate-900">Plan & Usage</h2>
           <p className="text-sm text-slate-600">
             Current plan: <span className="font-medium text-slate-800">{planLabel}</span>
-            {expires ? ` · access until ${expires}` : ''}
+            {expires ? ` - access until ${expires}` : ''}
           </p>
           <p className="text-xs text-slate-500">
-            Per-minute limits: {limits.generation.rateLimit} tailored CVs · {limits.optimization.rateLimit} optimizations
+            Per-minute limits: {limits.generation.rateLimit} tailored CVs - {limits.optimization.rateLimit} optimizations
           </p>
           {!limits.allowExport && (
             <p className="text-xs font-medium text-amber-600">Exports are disabled on this plan.</p>
@@ -85,7 +85,7 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
               </button>
             </form>
           </div>
-          <p className="text-[11px] text-slate-500">(Dev helper — replace with Stripe flow later)</p>
+          <p className="text-[11px] text-slate-500">(Dev helper - replace with Stripe flow later)</p>
         </div>
       </div>
 
