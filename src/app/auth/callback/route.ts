@@ -1,50 +1,67 @@
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import type { Database } from '@/types/database';
+import { NextRequest, NextResponse } from "next/server";
+import type { EmailOtpType, VerifyOtpParams } from "@supabase/supabase-js";
+import { createClientForRouteHandler } from "@/lib/supabase";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') ?? '/';
-  const cookieStore = await cookies();
-  const response = NextResponse.redirect(`${url.origin}${next}`);
+  const next = url.searchParams.get("next") ?? "/";
+  const responseUrl = new URL(next, url.origin);
+
+  const supabase = createClientForRouteHandler();
+  let authError: string | null = null;
+
+  const code = url.searchParams.get("code");
+  const accessToken = url.searchParams.get("access_token");
+  const refreshToken = url.searchParams.get("refresh_token");
+  const tokenHash = url.searchParams.get("token_hash");
+  const typeParam = url.searchParams.get("type") as VerifyOtpParams["type"] | null;
+  const emailOtpTypes: EmailOtpType[] = ["magiclink", "signup", "recovery", "email_change", "email"];
 
   if (code) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Supabase env vars missing for auth callback.');
-      return response;
-    }
-
-    const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
-      cookies: {
-        get(name) {
-          return cookieStore.get(name)?.value;
-        },
-        set(name, value, options) {
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name, options) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-            expires: new Date(0),
-          });
-        },
-      },
-    });
-
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      console.error('Supabase exchange error', error.message);
+      authError = error.message;
+      console.error("Supabase exchange error", error.message);
     }
+  } else if (accessToken && refreshToken) {
+    const { error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+    if (error) {
+      authError = error.message;
+      console.error("Supabase setSession error", error.message);
+    }
+  } else if (tokenHash && typeParam && emailOtpTypes.includes(typeParam as EmailOtpType)) {
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: typeParam as EmailOtpType,
+    });
+    if (error) {
+      authError = error.message;
+      console.error("Supabase verifyOtp error", error.message);
+    }
+  } else {
+    const errorDescription = url.searchParams.get("error_description");
+    if (errorDescription) {
+      authError = errorDescription;
+      console.error("Supabase callback error", errorDescription);
+    }
+  }
+
+  const response = NextResponse.redirect(responseUrl);
+
+  if (authError) {
+    response.cookies.set({
+      name: "sb-auth-error",
+      value: encodeURIComponent(authError),
+      path: "/",
+      maxAge: 10,
+    });
   }
 
   return response;
 }
+

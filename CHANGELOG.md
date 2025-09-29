@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 This log follows a pragmatic format suited for a solo developer. Each iteration should add a concise summary under Unreleased or a tagged version.
 
 ## [Unreleased]
+- Add security headers (CSP, HSTS, frame protections, Referrer-Policy, Permissions-Policy) via `next.config.ts` (T6.2)
+- Fix Supabase magic-link callback to accept both code and token flows, preventing redirect loops back to the sign-in form.
 - Refresh PRD.md, Specs.md, Security.md, and Design.md to match current Solo MVP scope (paste-only JDs, no cover letters, Next.js + Supabase stack)
 - Add section-level review flow (generated_cv_sections, approval server action, dashboard UI) (T5.1, T5.2)
 - Implement export service + history (/api/export/cv/[id], HTML/DOCX generation) (T5.3, T5.4)
