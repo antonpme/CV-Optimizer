@@ -1,6 +1,8 @@
 import { Ratelimit } from "@upstash/ratelimit";
+import type { Duration } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { SupabaseTypedClient } from "@/lib/supabase";
+import type { Database } from "@/types/database";
 
 type RateLimitOutcome = { ok: true } | { ok: false; message: string };
 
@@ -28,6 +30,8 @@ export type UserLimits = {
   allowExport: boolean;
   expiresAt: string | null;
 };
+
+type UserEntitlementRow = Database["public"]["Tables"]["user_entitlements"]["Row"];
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -100,7 +104,7 @@ function createLimiter(prefix: string, limit: number, window: string) {
   if (!redis || !limit || limit <= 0) return null;
   return new Ratelimit({
     redis,
-    limiter: Ratelimit.fixedWindow(limit, window),
+    limiter: Ratelimit.fixedWindow(limit, window as Duration),
     analytics: true,
     prefix,
   });
@@ -128,30 +132,30 @@ export async function getUserLimits(
   userId: string,
 ): Promise<UserLimits> {
   const defaults = envDefaults;
-  const { data } = await supabase
-    .from("user_entitlements")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const { data: row } = await supabase
+    .from('user_entitlements')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle<UserEntitlementRow>();
 
-  if (!data) {
+  if (!row) {
     return defaults;
   }
 
   return {
-    plan: data.plan ?? defaults.plan,
+    plan: row.plan ?? defaults.plan,
     generation: {
-      rateLimit: parseIntOrFallback(data.gen_rate_limit, defaults.generation.rateLimit),
-      windowSeconds: parseIntOrFallback(data.gen_window_seconds, defaults.generation.windowSeconds),
-      monthlyLimit: parseIntOrFallback(data.gen_monthly_limit, defaults.generation.monthlyLimit),
+      rateLimit: parseIntOrFallback(row.gen_rate_limit, defaults.generation.rateLimit),
+      windowSeconds: parseIntOrFallback(row.gen_window_seconds, defaults.generation.windowSeconds),
+      monthlyLimit: parseIntOrFallback(row.gen_monthly_limit, defaults.generation.monthlyLimit),
     },
     optimization: {
-      rateLimit: parseIntOrFallback(data.opt_rate_limit, defaults.optimization.rateLimit),
-      windowSeconds: parseIntOrFallback(data.opt_window_seconds, defaults.optimization.windowSeconds),
-      monthlyLimit: parseIntOrFallback(data.opt_monthly_limit, defaults.optimization.monthlyLimit),
+      rateLimit: parseIntOrFallback(row.opt_rate_limit, defaults.optimization.rateLimit),
+      windowSeconds: parseIntOrFallback(row.opt_window_seconds, defaults.optimization.windowSeconds),
+      monthlyLimit: parseIntOrFallback(row.opt_monthly_limit, defaults.optimization.monthlyLimit),
     },
-    allowExport: data.allow_export ?? defaults.allowExport,
-    expiresAt: data.expires_at ?? null,
+    allowExport: row.allow_export ?? defaults.allowExport,
+    expiresAt: row.expires_at ?? null,
   };
 }
 

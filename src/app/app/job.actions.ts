@@ -144,7 +144,7 @@ export async function generateTailoredCvs(
   if (!parsed.success) {
     return {
       status: 'error',
-      message: parsed.error.errors[0]?.message ?? 'Invalid generation request.',
+      message: parsed.error.issues[0]?.message ?? 'Invalid generation request.',
     };
   }
 
@@ -163,7 +163,6 @@ export async function generateTailoredCvs(
     userId: session.user.id,
     runType: 'cv_generation',
     limit: limits.generation.monthlyLimit,
-    limit: MONTHLY_GENERATION_LIMIT,
     pending: jobIds.length,
     label: 'tailored CV generations',
   });

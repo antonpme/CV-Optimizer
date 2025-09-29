@@ -40,7 +40,7 @@ export async function reviewGeneratedSection(
   if (!parsed.success) {
     return {
       status: 'error',
-      message: parsed.error.errors[0]?.message ?? 'Invalid section update.',
+      message: parsed.error.issues[0]?.message ?? 'Invalid section update.',
     };
   }
 

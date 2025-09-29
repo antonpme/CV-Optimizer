@@ -20,12 +20,12 @@ const diffHtml = (original: string, revised: string) => {
   const diffs = dmp.diff_main(original, revised);
   dmp.diff_cleanupSemantic(diffs);
   return diffs
-    .map(([type, text]) => {
+    .map(([kind, text]: [number, string]) => {
       const safe = escapeHtml(text);
-      if (type === 1) {
+      if (kind === 1) {
         return `<span class="bg-emerald-100 text-emerald-900 px-1">${safe}</span>`;
       }
-      if (type === -1) {
+      if (kind === -1) {
         return `<span class="bg-rose-100 text-rose-900 line-through px-1">${safe}</span>`;
       }
       return `<span>${safe}</span>`;
