@@ -1,8 +1,9 @@
-﻿import { createClientForServerComponent } from '@/lib/supabase';
+import { createClientForServerComponent } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
 import { PlanUsageCard } from '@/components/app/plan-usage-card';
+import { PLAN_PRESETS } from '@/lib/plan-presets';
 import { ReferenceCvPanel } from './reference-cv-panel';
 import { JobSection } from '@/components/app/job-section';
 import { GeneratedCvSection } from '@/components/app/generated-cv-section';
@@ -52,6 +53,42 @@ export default async function AppHome() {
     return null;
   }
 
+  const freePreset = PLAN_PRESETS.free;
+  const { data: entitlement } = await supabase
+    .from('user_entitlements')
+    .select('plan, gen_rate_limit, gen_window_seconds, gen_monthly_limit, opt_rate_limit, opt_window_seconds, opt_monthly_limit, allow_export, expires_at')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (!entitlement) {
+    await supabase
+      .from('user_entitlements')
+      .insert({
+        user_id: session.user.id,
+        ...freePreset,
+        expires_at: null,
+      });
+  } else if (entitlement.plan === 'free') {
+    const needsSync =
+      entitlement.gen_rate_limit !== freePreset.gen_rate_limit ||
+      entitlement.gen_window_seconds !== freePreset.gen_window_seconds ||
+      entitlement.gen_monthly_limit !== freePreset.gen_monthly_limit ||
+      entitlement.opt_rate_limit !== freePreset.opt_rate_limit ||
+      entitlement.opt_window_seconds !== freePreset.opt_window_seconds ||
+      entitlement.opt_monthly_limit !== freePreset.opt_monthly_limit ||
+      (entitlement.allow_export ?? freePreset.allow_export) !== freePreset.allow_export;
+
+    if (needsSync) {
+      await supabase
+        .from('user_entitlements')
+        .update({
+          ...freePreset,
+          updated_at: new Date().toISOString(),
+          expires_at: null,
+        })
+        .eq('user_id', session.user.id);
+    }
+  }
   const limits = await getUserLimits(supabase, session.user.id);
 
   const startOfMonth = new Date();
@@ -172,6 +209,13 @@ export default async function AppHome() {
     </div>
   );
 }
+
+
+
+
+
+
+
 
 
 

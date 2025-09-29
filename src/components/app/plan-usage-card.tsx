@@ -1,5 +1,5 @@
 import { setPlan } from '@/app/app/plan.actions';
-import { PLAN_PRESETS } from '@/app/app/plan-presets';
+import { PLAN_PRESETS } from '@/lib/plan-presets';
 import type { UserLimits } from '@/lib/rate-limit';
 
 type Props = {
@@ -107,3 +107,4 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
     </section>
   );
 }
+

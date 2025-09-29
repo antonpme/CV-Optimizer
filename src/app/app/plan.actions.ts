@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { PLAN_PRESETS, type PlanPresetKey } from './plan-presets';
+import { PLAN_PRESETS, type PlanPresetKey } from '@/lib/plan-presets';
 import { createClientForServerAction } from '@/lib/supabase';
 
 type PlanPreset = PlanPresetKey;
@@ -54,3 +54,4 @@ export async function setPlan(plan: PlanPreset) {
 
   revalidatePath('/app');
 }
+
