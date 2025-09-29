@@ -1,5 +1,5 @@
-ï»¿# Product Requirements Document (PRD)
-## AI-Powered CV Optimization Platform â€“ Solo MVP v1.1
+# Product Requirements Document (PRD)
+## AI-Powered CV Optimization Platform – Solo MVP v1.1
 
 ### 1. Product Vision
 Deliver a solo-friendly, managed-stack web application that helps job seekers tailor their CVs to specific job descriptions with transparent AI assistance. Prioritize low operational complexity (Vercel + Supabase), ethical guardrails, and user control over AI changes.
@@ -152,12 +152,13 @@ Job seekers struggle to customize their CVs quickly and confidently for multiple
 
 ### 13. Pricing & Go-to-Market
 - Beta: invite-only free cohort until Section Review + Export complete
-- Launch: Free tier (e.g., 50 tailored generations/month) + Pro plan ($12â€“19) with higher quotas and exports
+- Launch: Free tier (e.g., 3 tailored generations/month) + Pro plan ($12–19) with higher quotas and exports
 - Instrument usage logging to inform pricing before public launch
 
 ---
 
 **Version**: 1.1  
 **Date**: 2025-09-25  
-**Status**: Solo MVP â€“ live core flows, Phase 5 in progress  
+**Status**: Solo MVP – live core flows, Phase 5 in progress  
 **Next Review**: After section approval & export release
+

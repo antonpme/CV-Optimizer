@@ -121,10 +121,10 @@ Policies restrict reads/writes to `auth.uid() = user_id` (or equivalent) for all
 | `NEXT_PUBLIC_SITE_URL` | client/server | Used for auth redirects |
 | `NEXT_TELEMETRY_DISABLED` | optional | Disable Next telemetry locally |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | server | Rate limiting for AI actions (Upstash) |
-| `CV_GENERATION_RATE_LIMIT` / `CV_GENERATION_RATE_WINDOW` | server (optional) | Override per-user rate limit for tailored CV runs (default 5 per minute) |
-| `CV_OPTIMIZE_RATE_LIMIT` / `CV_OPTIMIZE_RATE_WINDOW` | server (optional) | Override per-user rate limit for reference optimizations (default 8 per minute) |
-| `CV_GENERATION_MONTHLY_LIMIT` | server (optional) | Monthly tailored CV quota per user (default 50) |
-| `CV_OPTIMIZE_MONTHLY_LIMIT` | server (optional) | Monthly reference optimization quota per user (default 30) |
+| `CV_GENERATION_RATE_LIMIT` / `CV_GENERATION_RATE_WINDOW` | server (optional) | Override per-user rate limit for tailored CV runs (default 3 per minute) |
+| `CV_OPTIMIZE_RATE_LIMIT` / `CV_OPTIMIZE_RATE_WINDOW` | server (optional) | Override per-user rate limit for reference optimizations (default 3 per minute) |
+| `CV_GENERATION_MONTHLY_LIMIT` | server (optional) | Monthly tailored CV quota per user (default 3) |
+| `CV_OPTIMIZE_MONTHLY_LIMIT` | server (optional) | Monthly reference optimization quota per user (default 3) |
 
 ### 8. Deployment & CI/CD
 - GitHub repo `antonpme/CV-Optimizer`
@@ -159,3 +159,4 @@ Policies restrict reads/writes to `auth.uid() = user_id` (or equivalent) for all
 **Date**: 2025-09-25  
 **Status**: Solo MVP - Phase 6 in progress (rate limiting live)  
 **Next Review**: After Phase 6 hardening (headers, telemetry, accessibility)
+

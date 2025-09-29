@@ -61,13 +61,13 @@ function parseIntOrFallback(value: number | null | undefined, fallback: number):
 }
 
 function getEnvDefaults(): UserLimits {
-  const generationRate = Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? "5", 10);
+  const generationRate = Number.parseInt(process.env.CV_GENERATION_RATE_LIMIT ?? "3", 10);
   const generationWindowSeconds = parseWindowToSeconds(process.env.CV_GENERATION_RATE_WINDOW, 60);
-  const generationMonthly = Number.parseInt(process.env.CV_GENERATION_MONTHLY_LIMIT ?? "50", 10);
+  const generationMonthly = Number.parseInt(process.env.CV_GENERATION_MONTHLY_LIMIT ?? "3", 10);
 
-  const optimizationRate = Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? "8", 10);
+  const optimizationRate = Number.parseInt(process.env.CV_OPTIMIZE_RATE_LIMIT ?? "3", 10);
   const optimizationWindowSeconds = parseWindowToSeconds(process.env.CV_OPTIMIZE_RATE_WINDOW, 60);
-  const optimizationMonthly = Number.parseInt(process.env.CV_OPTIMIZE_MONTHLY_LIMIT ?? "30", 10);
+  const optimizationMonthly = Number.parseInt(process.env.CV_OPTIMIZE_MONTHLY_LIMIT ?? "3", 10);
 
   return {
     plan: "free",
@@ -318,3 +318,4 @@ async function dbWindowCheck(params: {
 
   return { ok: true };
 }
+
