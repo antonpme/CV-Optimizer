@@ -1,41 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { PLAN_PRESETS, type PlanPresetKey } from './plan-presets';
 import { createClientForServerAction } from '@/lib/supabase';
 
-const PLAN_PRESETS = {
-  free: {
-    plan: 'free',
-    gen_rate_limit: 5,
-    gen_window_seconds: 60,
-    gen_monthly_limit: 50,
-    opt_rate_limit: 8,
-    opt_window_seconds: 60,
-    opt_monthly_limit: 30,
-    allow_export: true,
-  },
-  pro: {
-    plan: 'pro',
-    gen_rate_limit: 15,
-    gen_window_seconds: 60,
-    gen_monthly_limit: 300,
-    opt_rate_limit: 20,
-    opt_window_seconds: 60,
-    opt_monthly_limit: 120,
-    allow_export: true,
-  },
-} satisfies Record<string, {
-  plan: string;
-  gen_rate_limit: number;
-  gen_window_seconds: number;
-  gen_monthly_limit: number;
-  opt_rate_limit: number;
-  opt_window_seconds: number;
-  opt_monthly_limit: number;
-  allow_export: boolean;
-}>;
-
-export type PlanPreset = keyof typeof PLAN_PRESETS;
+type PlanPreset = PlanPresetKey;
 
 export async function setPlan(plan: PlanPreset) {
   const supabase = createClientForServerAction();

@@ -1,4 +1,5 @@
 import { setPlan } from '@/app/app/plan.actions';
+import { PLAN_PRESETS } from '@/app/app/plan-presets';
 import type { UserLimits } from '@/lib/rate-limit';
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 
 const setFreePlan = setPlan.bind(null, 'free');
 const setProPlan = setPlan.bind(null, 'pro');
+const freePreset = PLAN_PRESETS.free;
 
 const formatPercent = (used: number, limit: number) => {
   if (limit <= 0) {
@@ -45,6 +47,15 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
 }
 
 export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Props) {
+  const freeDefaultsApplied =
+    limits.plan === 'free' &&
+    limits.generation.rateLimit === freePreset.gen_rate_limit &&
+    limits.generation.windowSeconds === freePreset.gen_window_seconds &&
+    limits.generation.monthlyLimit === freePreset.gen_monthly_limit &&
+    limits.optimization.rateLimit === freePreset.opt_rate_limit &&
+    limits.optimization.windowSeconds === freePreset.opt_window_seconds &&
+    limits.optimization.monthlyLimit === freePreset.opt_monthly_limit &&
+    limits.allowExport === freePreset.allow_export;
   const planLabel = limits.plan.charAt(0).toUpperCase() + limits.plan.slice(1);
   const expires = limits.expiresAt ? new Date(limits.expiresAt).toLocaleDateString() : null;
 
@@ -70,7 +81,7 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
               <button
                 type="submit"
                 className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={limits.plan === 'free'}
+                disabled={limits.plan === 'free' && freeDefaultsApplied}
               >
                 Switch to Free
               </button>
