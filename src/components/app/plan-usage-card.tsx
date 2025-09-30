@@ -31,12 +31,12 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
   const display = formatLimitLabel(used, limit);
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" role="group" aria-label={label}>
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>{label}</span>
-        <span>{display}</span>
+        <span aria-live="polite">{display}</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-100">
+      <div className="h-2 rounded-full bg-slate-100" aria-hidden="true">
         <div
           className="h-2 rounded-full bg-slate-600"
           style={{ width: `${limit <= 0 ? 100 : percent}%` }}
@@ -60,17 +60,22 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
   const expires = limits.expiresAt ? new Date(limits.expiresAt).toLocaleDateString() : null;
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm" aria-label="Plan limits and usage">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-slate-900">Plan & Usage</h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600" aria-live="polite">
             Current plan: <span className="font-medium text-slate-800">{planLabel}</span>
             {expires ? ` - access until ${expires}` : ''}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500" aria-live="polite">
             Per-minute limits: {limits.generation.rateLimit} tailored CVs - {limits.optimization.rateLimit} optimizations
           </p>
+          {limits.plan === 'free' && !freeDefaultsApplied && (
+            <p className="text-xs font-medium text-amber-600" role="status">
+              Free plan limits differ from the latest defaults. Select &quot;Switch to Free&quot; to resync.
+            </p>
+          )}
           {!limits.allowExport && (
             <p className="text-xs font-medium text-amber-600">Exports are disabled on this plan.</p>
           )}
@@ -82,6 +87,7 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
                 type="submit"
                 className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={limits.plan === 'free' && freeDefaultsApplied}
+                aria-disabled={limits.plan === 'free' && freeDefaultsApplied}
               >
                 Switch to Free
               </button>
@@ -91,6 +97,7 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
                 type="submit"
                 className="rounded-md border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={limits.plan === 'pro'}
+                aria-disabled={limits.plan === 'pro'}
               >
                 Switch to Pro
               </button>
@@ -100,11 +107,10 @@ export function PlanUsageCard({ limits, generationUsed, optimizationUsed }: Prop
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2" role="list">
         <UsageBar label="Tailored CVs this month" used={generationUsed} limit={limits.generation.monthlyLimit} />
         <UsageBar label="Reference optimizations this month" used={optimizationUsed} limit={limits.optimization.monthlyLimit} />
       </div>
     </section>
   );
 }
-

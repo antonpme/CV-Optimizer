@@ -24,6 +24,7 @@ This guide sets up the managed backend and environment for development and deplo
   - `OPENAI_API_KEY`
   - Optional: Upstash tokens for rate limiting; Stripe keys if enabling billing
 - Optional overrides: `CV_GENERATION_RATE_LIMIT`, `CV_GENERATION_RATE_WINDOW`, `CV_GENERATION_MONTHLY_LIMIT`, `CV_OPTIMIZE_RATE_LIMIT`, `CV_OPTIMIZE_RATE_WINDOW`, `CV_OPTIMIZE_MONTHLY_LIMIT` (set to `0` for unlimited)
+- Logging: request IDs are added automatically; use Vercel + Supabase logs (JSON output) for telemetry.
 
 ## 5) Storage
 - Bucket `cv-uploads` is created by `supabase/storage.sql`.
@@ -45,3 +46,5 @@ This guide sets up the managed backend and environment for development and deplo
 ---
 
 If you run into SQL errors, ensure your Supabase project has `pgcrypto` enabled (it is enabled by default in most projects) and re-run the files in order.
+
+

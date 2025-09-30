@@ -58,3 +58,6 @@ export function CvSection({ cvs }: { cvs: CvRow[] }) {
     </section>
   );
 }
+
+
+

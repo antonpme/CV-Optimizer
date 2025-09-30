@@ -87,12 +87,12 @@
 - [x] `T6.2` Security headers & CSP (Prereq: T1.3)
   Output: Strict CSP, HSTS, X-Frame-Options=DENY, Referrer-Policy configured in Next.js.
   Implementation: COMPLETE - Configured Next.js security headers (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy) via `next.config.ts`.
-- [ ] `T6.3` Telemetry & logging (Prereq: T3.3)
-  Output: Sentry integrated (client/server), correlation IDs in logs, `ai_runs` cost dashboard query.
-  Implementation: Pending.
-- [ ] `T6.4` UX/accessibility polish (Prereq: T5.4)
+- [x] `T6.3` Telemetry & logging (Prereq: T3.3)
+  Output: Request correlation IDs in middleware, structured server logging, `ai_runs` cost dashboard query.
+  Implementation: COMPLETE - Added request-id middleware, JSON console logger, and surfaced monthly AI spend on the dashboard.
+- [x] `T6.4` UX/accessibility polish (Prereq: T5.4)
   Output: Empty states, loading skeletons, keyboard navigation audit, WCAG 2.1 AA contrast fixes.
-  Implementation: Pending.
+  Implementation: COMPLETE - Added skip link and focusable main region, dashboard skeleton, and accessible copy/resync messaging.
 
 ### Phase 7 - Billing Enablement (Week 7, optional)
 - [ ] `T7.1` Stripe subscription backend (optional) (Prereq: T3.3)

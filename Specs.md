@@ -9,7 +9,7 @@
 - **Processing**: Synchronous server actions; sequential JD handling (no queues yet)
 - **Auth**: Supabase email/magic-link; SSR helpers for middleware, server comps/actions
 - **Deployment**: Vercel project `ai-cv-optimizer`; Supabase FRA1 region
-- **Observability**: Supabase logs + Vercel logs; Sentry planned (Phase 6)
+- **Observability**: Supabase logs + Vercel logs + JSON request logging with correlation IDs.
 
 ### 1. System Architecture
 
@@ -106,7 +106,7 @@ Policies restrict reads/writes to `auth.uid() = user_id` (or equivalent) for all
 ### 6. Pending Features (Phase 5+)
 - Section-level approval UI + API
 - Export service for HTML/DOCX (templating, signed URLs)
-- Rate limiting (Upstash), CSP/Security headers, Sentry telemetry
+- Rate limiting (Upstash), CSP/Security headers, structured logging.
 - Stripe billing + quotas
 - Automated test suite (Playwright) prior to beta
 
@@ -136,7 +136,7 @@ Policies restrict reads/writes to `auth.uid() = user_id` (or equivalent) for all
 - Supabase logs (database, auth) accessible via dashboard
 - `ai_runs` table captures provider usage, errors
 - Vercel request logs for server actions
-- Sentry integration planned to capture client/server errors (Phase 6)
+- JSON console logs (with request IDs) complement Supabase/Vercel logs.
 
 ### 10. Data Retention
 - User-configurable `data_retention_days` stored in `profiles`
@@ -159,4 +159,5 @@ Policies restrict reads/writes to `auth.uid() = user_id` (or equivalent) for all
 **Date**: 2025-09-25  
 **Status**: Solo MVP - Phase 6 in progress (rate limiting live)  
 **Next Review**: After Phase 6 hardening (headers, telemetry, accessibility)
+
 

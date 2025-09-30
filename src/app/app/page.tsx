@@ -3,16 +3,19 @@ import type { Database } from '@/types/database';
 import { ProfileForm } from './profile-form';
 import { CvSection } from './cv-section';
 import { PlanUsageCard } from '@/components/app/plan-usage-card';
+import { CostSummaryCard } from '@/components/app/cost-summary-card';
 import { PLAN_PRESETS } from '@/lib/plan-presets';
 import { ReferenceCvPanel } from './reference-cv-panel';
 import { JobSection } from '@/components/app/job-section';
 import { GeneratedCvSection } from '@/components/app/generated-cv-section';
 import { getUserLimits } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 type SectionRow = Database['public']['Tables']['generated_cv_sections']['Row'];
 type ExportRow = Database['public']['Tables']['cv_exports']['Row'];
+type AiRunRow = Database['public']['Tables']['ai_runs']['Row'];
 
 type SectionsByCv = Record<string, SectionRow[]>;
 type ExportsByCv = Record<string, ExportRow[]>;
@@ -56,18 +59,24 @@ export default async function AppHome() {
   const freePreset = PLAN_PRESETS.free;
   const { data: entitlement } = await supabase
     .from('user_entitlements')
-    .select('plan, gen_rate_limit, gen_window_seconds, gen_monthly_limit, opt_rate_limit, opt_window_seconds, opt_monthly_limit, allow_export, expires_at')
+    .select('plan, gen_rate_limit, gen_window_seconds, gen_monthly_limit, opt_rate_limit, opt_window_seconds, opt_monthly_limit, allow_export')
     .eq('user_id', session.user.id)
     .maybeSingle();
 
   if (!entitlement) {
-    await supabase
+    const { error } = await supabase
       .from('user_entitlements')
       .insert({
         user_id: session.user.id,
         ...freePreset,
         expires_at: null,
       });
+
+    if (error) {
+      logger.error('Provisioning free plan failed', { error: error.message, userId: session.user.id });
+    } else {
+      logger.info('Provisioned free plan defaults', { userId: session.user.id });
+    }
   } else if (entitlement.plan === 'free') {
     const needsSync =
       entitlement.gen_rate_limit !== freePreset.gen_rate_limit ||
@@ -79,7 +88,7 @@ export default async function AppHome() {
       (entitlement.allow_export ?? freePreset.allow_export) !== freePreset.allow_export;
 
     if (needsSync) {
-      await supabase
+      const { error } = await supabase
         .from('user_entitlements')
         .update({
           ...freePreset,
@@ -87,8 +96,15 @@ export default async function AppHome() {
           expires_at: null,
         })
         .eq('user_id', session.user.id);
+
+      if (error) {
+        logger.error('Resyncing free plan defaults failed', { error: error.message, userId: session.user.id });
+      } else {
+        logger.info('Resynced free plan defaults', { userId: session.user.id });
+      }
     }
   }
+
   const limits = await getUserLimits(supabase, session.user.id);
 
   const startOfMonth = new Date();
@@ -114,6 +130,36 @@ export default async function AppHome() {
 
   const generationUsed = generationUsageCount ?? 0;
   const optimizationUsed = optimizationUsageCount ?? 0;
+
+  const { data: costRows } = await supabase
+    .from('ai_runs')
+    .select('run_type, cost_usd')
+    .eq('user_id', session.user.id)
+    .eq('status', 'success')
+    .gte('created_at', startOfMonthIso);
+
+  const costSummary = (costRows ?? []).reduce(
+    (acc, row) => {
+      const raw = (row as Partial<AiRunRow>).cost_usd;
+      const cost = typeof raw === 'number' ? raw : Number.parseFloat(raw ?? '0');
+      if (Number.isFinite(cost)) {
+        acc.total += cost;
+        if (row.run_type === 'cv_generation') {
+          acc.generation += cost;
+        } else if (row.run_type === 'optimize_cv') {
+          acc.optimization += cost;
+        }
+      }
+      return acc;
+    },
+    { total: 0, generation: 0, optimization: 0 },
+  );
+
+  const costTotals = {
+    total: Number(costSummary.total.toFixed(2)),
+    generation: Number(costSummary.generation.toFixed(2)),
+    optimization: Number(costSummary.optimization.toFixed(2)),
+  };
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -172,7 +218,7 @@ export default async function AppHome() {
   const exportsByCv = groupExports(exportHistory);
 
   return (
-    <div className="space-y-10">
+    <main id="main-content" tabIndex={-1} className="space-y-10">
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold text-slate-900">Your Profile</h1>
         <p className="text-sm text-slate-600">
@@ -183,6 +229,11 @@ export default async function AppHome() {
         limits={limits}
         generationUsed={generationUsed}
         optimizationUsed={optimizationUsed}
+      />
+      <CostSummaryCard
+        total={costTotals.total}
+        generation={costTotals.generation}
+        optimization={costTotals.optimization}
       />
       <ProfileForm key={formKey} initial={profile ?? null} />
 
@@ -206,17 +257,6 @@ export default async function AppHome() {
         exportsByCv={exportsByCv}
         allowExport={limits.allowExport}
       />
-    </div>
+    </main>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

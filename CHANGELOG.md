@@ -9,6 +9,8 @@ This log follows a pragmatic format suited for a solo developer. Each iteration 
 - Lower default free-tier quotas to 3 monthly generations/optimizations and tighten per-minute limits to 3.
 - Sync dashboard plan presets with new quotas and allow reapplying the Free plan defaults via plan card.
 - Auto-provision the Free plan (3/3 limits) for all users at sign-in, resyncing existing free records.
+- Add request-id middleware, JSON server logging, and monthly AI spend summary (T6.3)
+- Improve dashboard accessibility with skip link, skeleton loading, and updated plan messaging (T6.4)
 - Refresh PRD.md, Specs.md, Security.md, and Design.md to match current Solo MVP scope (paste-only JDs, no cover letters, Next.js + Supabase stack)
 - Add section-level review flow (generated_cv_sections, approval server action, dashboard UI) (T5.1, T5.2)
 - Implement export service + history (/api/export/cv/[id], HTML/DOCX generation) (T5.3, T5.4)

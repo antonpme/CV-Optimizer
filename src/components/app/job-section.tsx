@@ -19,7 +19,7 @@ function SubmitButton({ label, disabled }: { label: string; disabled?: boolean }
       className="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
       disabled={pending || disabled}
     >
-      {pending ? `${label}…` : label}
+      {pending ? `${label}...` : label}
     </button>
   );
 }
@@ -34,7 +34,7 @@ function DeleteButton({ jobId }: { jobId: string }) {
       disabled={pending}
       className="text-xs font-semibold text-rose-600 hover:text-rose-700 disabled:cursor-not-allowed"
     >
-      {pending ? 'Removing…' : 'Remove'}
+      {pending ? 'Removing...' : 'Remove'}
     </button>
   );
 }
@@ -80,24 +80,14 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
             <label htmlFor="job-title" className="text-sm font-medium text-slate-700">
               Job title (optional)
             </label>
-            <input
-              id="job-title"
-              name="title"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              placeholder="Product Manager"
-            />
+            <input id="job-title" name="title" className="rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Product Manager" />
             {addState.errors?.title && <p className="text-xs text-rose-600">{addState.errors.title}</p>}
           </div>
           <div className="grid gap-2">
             <label htmlFor="job-company" className="text-sm font-medium text-slate-700">
               Company (optional)
             </label>
-            <input
-              id="job-company"
-              name="company"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
-              placeholder="Acme Corp"
-            />
+            <input id="job-company" name="company" className="rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="Acme Corp" />
             {addState.errors?.company && <p className="text-xs text-rose-600">{addState.errors.company}</p>}
           </div>
         </div>
@@ -114,7 +104,7 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
             placeholder="Paste the responsibilities, requirements, and company summary."
           />
           {addState.errors?.text && <p className="text-xs text-rose-600">{addState.errors.text}</p>}
-          <p className="text-xs text-slate-500">Min 80 characters · Max 8000 characters · Stored job descriptions: {jobCount}/20</p>
+          <p className="text-xs text-slate-500">Min 80 characters - Max 8000 characters - Stored job descriptions: {jobCount}/20</p>
         </div>
 
         <SubmitButton label="Save job" />
@@ -130,11 +120,9 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
             <article key={job.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-slate-900">
-                    {job.title ?? 'Untitled role'}
-                  </h3>
+                  <h3 className="text-sm font-semibold text-slate-900">{job.title ?? 'Untitled role'}</h3>
                   <p className="text-xs text-slate-500">
-                    {job.company ? `${job.company} · ` : ''}
+                    {job.company ? `${job.company} - ` : ''}
                     Added {job.created_at ? new Date(job.created_at).toLocaleDateString() : 'recently'}
                   </p>
                 </div>
@@ -153,19 +141,14 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
                 </div>
               </div>
               <p className="mt-3 text-sm text-slate-700">
-                {job.text_content.length > 400
-                  ? `${job.text_content.slice(0, 400)}…`
-                  : job.text_content}
+                {job.text_content.length > 400 ? `${job.text_content.slice(0, 400)}...` : job.text_content}
               </p>
             </article>
           ))
         )}
       </div>
 
-      <form
-        action={generateAction}
-        className="grid gap-3 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-      >
+      <form action={generateAction} className="grid gap-3 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <input type="hidden" name="embellishment_level" value="3" />
         {selectedJobIds.map((id) => (
           <input key={id} type="hidden" name="job_ids" value={id} />
@@ -178,10 +161,7 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
               Select up to 5 job descriptions and generate tailored CVs sequentially. Requires an active reference CV.
             </p>
           </div>
-          <SubmitButton
-            label="Generate"
-            disabled={!hasReferenceCv || selectedJobIds.length === 0}
-          />
+          <SubmitButton label="Generate" disabled={!hasReferenceCv || selectedJobIds.length === 0} />
         </div>
 
         {generateState.status === 'success' && (
@@ -217,6 +197,6 @@ export function JobSection({ jobs, hasReferenceCv }: { jobs: JobRow[]; hasRefere
 }
 
 export function useJobSelections(jobs: JobRow[]) {
-  const map = useMemo(() => new Map(jobs.map((job) => [job.id, job])), [jobs]);
-  return map;
+  return useMemo(() => new Map(jobs.map((job) => [job.id, job])), [jobs]);
 }
+

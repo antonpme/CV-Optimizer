@@ -49,6 +49,7 @@ Sections in order:
 ### 5. Interaction Patterns
 - **Forms**: use `useFormState`, show success toast + summary inline
 - **Progress**: Buttons show spinner while server action pending; generator displays status message (success/partial/error)
+- **Loading states**: Dashboard route uses skeleton cards and polite announcements during data fetch.
 - **Empty States**: Provide quick-start copy, e.g., CV library empty card with illustration placeholder
 - **Errors**: Inline field errors + toast with actionable guidance
 - **Focus order**: Logical top-to-bottom, ensuring keyboard navigation works without traps
@@ -86,3 +87,4 @@ Sections in order:
 **Date**: 2025-09-25  
 **Status**: Solo MVP - dashboard live, approval/export in design backlog  
 **Next Review**: After Phase 5 UI delivery
+
