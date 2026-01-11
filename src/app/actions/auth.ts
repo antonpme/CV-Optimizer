@@ -19,7 +19,7 @@ export async function signInWithEmail(
     return { status: 'error', message: 'Email is required.' };
   }
 
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   // In Next 15, headers() is async in server actions
   const hdrs = await headers();
   const origin = hdrs.get('origin') ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
@@ -43,7 +43,7 @@ export async function signInWithEmail(
 }
 
 export async function signOut() {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   await supabase.auth.signOut();
   redirect('/');
 }

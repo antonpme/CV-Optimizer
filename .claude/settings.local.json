@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(powershell -Command \"Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue; Get-ChildItem -Name ''nul'' -ErrorAction SilentlyContinue\")"
+    ]
+  }
+}

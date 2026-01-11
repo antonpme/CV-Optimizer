@@ -6,7 +6,7 @@ import { SignOutForm } from '@/components/auth/sign-out-form';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const supabase = createClientForServerComponent();
+  const supabase = await createClientForServerComponent();
   const {
     data: { session },
   } = await supabase.auth.getSession();

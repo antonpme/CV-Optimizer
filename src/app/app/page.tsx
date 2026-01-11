@@ -10,6 +10,8 @@ import { JobSection } from '@/components/app/job-section';
 import { GeneratedCvSection } from '@/components/app/generated-cv-section';
 import { getUserLimits } from '@/lib/rate-limit';
 import { logger } from '@/lib/logger';
+import { CreditsWidget, StatsWidget, ActivityWidget } from '@/components/dashboard';
+import { getDashboardStats, getRecentActivity } from '@/lib/dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +49,7 @@ function groupExports(exportsList: ExportRow[] | null | undefined): ExportsByCv 
 }
 
 export default async function AppHome() {
-  const supabase = createClientForServerComponent();
+  const supabase = await createClientForServerComponent();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -217,14 +219,41 @@ export default async function AppHome() {
   const sectionsByCv = groupSections(generatedSections);
   const exportsByCv = groupExports(exportHistory);
 
+  // Fetch dashboard data
+  const [dashboardStats, recentActivity] = await Promise.all([
+    getDashboardStats(supabase, session.user.id),
+    getRecentActivity(supabase, session.user.id, 5),
+  ]);
+
   return (
     <main id="main-content" tabIndex={-1} className="space-y-10">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold text-slate-900">Your Profile</h1>
-        <p className="text-sm text-slate-600">
-          Keep this information current so AI optimizations stay accurate.
-        </p>
-      </div>
+      {/* Dashboard Overview */}
+      <section className="space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-600">
+            Your CV optimization overview and credits balance.
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <StatsWidget
+          cvsOptimized={dashboardStats.cvsOptimized}
+          cvsGenerated={dashboardStats.cvsGenerated}
+          totalSpent={dashboardStats.totalSpentUsd}
+          creditsUsed={dashboardStats.creditsUsed}
+        />
+
+        {/* Credits + Activity Row */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <CreditsWidget balance={dashboardStats.creditsBalance} />
+          <div className="md:col-span-1 lg:col-span-2">
+            <ActivityWidget activities={recentActivity} />
+          </div>
+        </div>
+      </section>
+
+      {/* Legacy cards - can be removed later */}
       <PlanUsageCard
         limits={limits}
         generationUsed={generationUsed}
@@ -235,7 +264,17 @@ export default async function AppHome() {
         generation={costTotals.generation}
         optimization={costTotals.optimization}
       />
-      <ProfileForm key={formKey} initial={profile ?? null} />
+
+      {/* Profile Section */}
+      <section className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-slate-900">Your Profile</h2>
+          <p className="text-sm text-slate-600">
+            Keep this information current so AI optimizations stay accurate.
+          </p>
+        </div>
+        <ProfileForm key={formKey} initial={profile ?? null} />
+      </section>
 
       <ReferenceCvPanel
         referenceCv={referenceCv ?? null}

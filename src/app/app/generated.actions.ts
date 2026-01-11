@@ -22,7 +22,7 @@ export async function reviewGeneratedSection(
   _prev: SectionReviewState,
   formData: FormData,
 ): Promise<SectionReviewState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
