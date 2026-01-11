@@ -189,3 +189,44 @@ src/
 - [ ] UI is consistent and polished
 - [ ] Mobile responsive
 - [ ] Error states handled gracefully
+
+---
+
+## Session Log
+
+### 2026-01-11 — Session 2 (Ren)
+
+**Completed:**
+- Fixed parsing error in `src/app/app/page.tsx` (unclosed `<section>` tag)
+- Migrated `useFormState` → `useActionState` in `sign-in-form.tsx` (React 19)
+- Created `.env.local` with Supabase credentials from MCP
+- Verified TypeScript compiles cleanly
+- Tested auth flow — magic link works, redirects to Vercel deployment
+- Committed and pushed to `feature/ui-redesign` branch (49 files, 4117 additions)
+
+**Decisions:**
+- Testing on Vercel deployment instead of localhost (user preference)
+- Branch: `feature/ui-redesign` for all Phase 1 work
+
+**Next Session:**
+1. Check Vercel deployment status
+2. Test dashboard widgets visually on Vercel
+3. Create Stripe products/prices via MCP
+4. Implement `/api/checkout/route.ts`
+5. Create `/app/pricing` page
+
+**Commit:** `fbca6f1` — "feat: Phase 1 credits system foundation"
+
+---
+
+### 2026-01-10 — Session 1 (Ren)
+
+**Completed:**
+- Installed shadcn/ui and created 12 UI components
+- Created dashboard widgets (CreditsWidget, StatsWidget, ActivityWidget)
+- Created `dashboard.ts` data fetching functions
+- Migrated Supabase from auth-helpers to @supabase/ssr
+- Updated `database.ts` with full type definitions and RPC types
+- Created documentation (TASKS.md, DATABASE.md, DESIGN-SYSTEM.md, ROADMAP.md)
+- Database tables created via Supabase MCP (user_balances, credit_transactions, stripe_events)
+- RPC functions created (add_credits, spend_credits, link_stripe_customer, get_user_by_stripe_customer)
