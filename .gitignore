@@ -37,8 +37,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# MCP config (contains secrets)
+.mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 .kilocode/
 END _OF_CHAT.md
+
+# Windows reserved names
+nul

@@ -9,7 +9,7 @@ export default async function AppLayout({
 }: {
   children: ReactNode;
 }) {
-  const supabase = createClientForServerComponent();
+  const supabase = await createClientForServerComponent();
   const {
     data: { session },
   } = await supabase.auth.getSession();

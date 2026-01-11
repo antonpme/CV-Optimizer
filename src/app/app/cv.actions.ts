@@ -37,7 +37,7 @@ export async function uploadCv(
   _prevState: UploadCvState,
   formData: FormData,
 ): Promise<UploadCvState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -185,7 +185,7 @@ export async function uploadCv(
 }
 
 export async function setReferenceCv(cvId: string) {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -221,7 +221,7 @@ export async function optimizeReferenceCv(
   prevState: OptimizeCvState,
   formData: FormData,
 ): Promise<OptimizeCvState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -298,7 +298,6 @@ export async function optimizeReferenceCv(
         full_name: profile?.full_name ?? undefined,
         job_title: profile?.job_title ?? undefined,
         professional_summary: profile?.professional_summary ?? undefined,
-        industry: profile?.industry ?? undefined,
         embellishment_level: profile?.embellishment_level ?? undefined,
       },
       embellishmentLevel: embellishment,

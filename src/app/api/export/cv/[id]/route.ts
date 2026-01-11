@@ -97,7 +97,7 @@ const buildDocxBuffer = async (sections: SectionPayload[], meta: { title?: strin
 };
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const supabase = createClientForRouteHandler();
+  const supabase = await createClientForRouteHandler();
   const {
     data: { session },
   } = await supabase.auth.getSession();

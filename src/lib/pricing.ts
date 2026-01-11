@@ -32,10 +32,15 @@ function applyOverhead(value: number): number {
 export function quoteRun(options: QuoteOptions): QuoteBreakdown {
   const modelKey = options.model ?? DEFAULT_MODEL;
   const modelPricing = PRICING.models[modelKey];
-  const feature = PRICING.features[options.runType];
+  const feature = PRICING.features[options.runType] as {
+    baseCredits: number;
+    perKInputTokens?: number;
+    perKOutputTokens?: number;
+    defaultUsage?: { inputTokens: number; outputTokens: number };
+  };
 
   if (!feature) {
-    throw new Error(Unknown run type: );
+    throw new Error(`Unknown run type: ${options.runType}`);
   }
 
   const tokensIn = options.inputTokens ?? feature.defaultUsage?.inputTokens ?? 0;
@@ -73,5 +78,5 @@ export function formatCredits(value: number): string {
   const decimals = PRICING.credit.decimals ?? 0;
   const factor = Math.pow(10, decimals);
   const normalized = value / factor;
-  return ${normalized.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ;
+  return `${normalized.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} credits`;
 }
