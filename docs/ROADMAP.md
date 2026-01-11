@@ -1,82 +1,113 @@
 # CV Optimizer — Product Roadmap
 
 ## Vision
-AI-powered CV optimization platform with per-page pricing and credits system.
+
+**"Help me get the job I'm applying for RIGHT NOW"**
+
+AI-powered CV optimization platform that tailors your CV for specific job descriptions.
+Credits-based pricing — pay per operation, not subscriptions.
 
 ---
 
-## Phase 1: Launch NOW (MVP)
+## Core Concept: CV Branching
 
-### Core Features
-- [x] CV upload and parsing (docx)
-- [x] Job description input
-- [x] AI-powered CV optimization
-- [x] Tailored CV generation
-- [x] Export to docx/html
-- [ ] **Per-page pricing ($1/page)**
-- [ ] **Top-up credits system**
-- [ ] **Stripe checkout integration**
-- [ ] **Dashboard with basic metrics**
+```
+Original CV (uploaded, immutable)
+    │
+    ▼
+Master CV (AI-optimized baseline)
+    │
+    ├── Branch: "Google SWE" (tailored to JD)
+    │       └── v1 → v2 → v3 (iterations)
+    │
+    ├── Branch: "Meta PM" (tailored to JD)
+    │       └── v1 → v2
+    │
+    └── Branch: "Startup CTO" (tailored to JD)
+            └── v1
+```
 
-### Pricing Model
+User can iterate on branches until satisfied, then export.
+
+---
+
+## 2026 Trajectory
+
+### Q1: CV Optimization (Phase 1) ← WE ARE HERE
+**JTBD:** "Help me tailor my CV for this specific job"
+
+- [ ] Upload CV → Create Master CV
+- [ ] Add JD → Create Branch (tailored CV)
+- [ ] Re-generate / Refine iterations
+- [ ] Export ready CV
+- [ ] Credits system + Stripe checkout
+- [ ] Clean UI with sidebar navigation
+
+### Q2: Smart Job Search (Phase 2)
+**JTBD:** "Help me find jobs that match my profile"
+
+- [ ] MCP integrations (LinkedIn, Indeed, Glassdoor)
+- [ ] AI matching: JD ↔ User Profile
+- [ ] "Jobs for you" personalized feed
+- [ ] Save & organize interesting JDs
+
+### Q3: Auto-Apply (Phase 3)
+**JTBD:** "Help me apply faster"
+
+- [ ] Application form auto-fill agent
+- [ ] Application tracking dashboard
+- [ ] Status monitoring (applied → interview → offer)
+- [ ] Response detection
+
+### Q4: Interview Prep (Phase 4)
+**JTBD:** "Help me prepare for interviews"
+
+- [ ] Email/portal response analysis
+- [ ] Voice AI sparring partner
+- [ ] Role-specific preparation
+- [ ] Common questions by company/role
+
+---
+
+## Phase 1 Details
+
+### Credit Operations
+
+| Operation | Credits | Description |
+|-----------|---------|-------------|
+| Create Master CV | 5 | Deep AI optimization of original |
+| New Branch (per JD) | 3 | JD analysis + tailored generation |
+| Re-generate | 1 | New attempt, same inputs |
+| Refine | 2 | User feedback → targeted edit |
+
+### Credit Packs
+
 | Pack | Credits | Price | Per Credit |
 |------|---------|-------|------------|
-| Starter | 5 | $5 | $1.00 |
-| Basic | 12 | $10 | $0.83 |
-| Pro | 30 | $20 | $0.67 |
-| Enterprise | 100 | $50 | $0.50 |
+| Starter | 10 | $10 | $1.00 |
+| Basic | 25 | $20 | $0.80 |
+| Pro | 60 | $40 | $0.67 |
+| Enterprise | 150 | $75 | $0.50 |
 
-> 1 credit = 1 page of CV optimization
+### UI Structure
 
-### Dashboard Metrics (Phase 1)
-- Credits Balance
-- Money Spent (total $)
-- CVs Optimized (count)
-- Pages Processed (count)
-- Recent Activity (last 5 actions)
+```
+/app
+├── Dashboard        ✓ Overview + credits widget
+├── CV Lab           ✓ Master + Branches workflow
+├── Jobs             ✓ Saved JDs (manual add)
+├── Applications     🔒 Coming Q2
+├── Billing          ✓ Credits + transactions
+└── Settings         ✓ Profile
+```
 
-### Tech Tasks
-See [TASKS.md](./TASKS.md) for detailed breakdown.
+### AI Architecture (No Fine-tuning)
 
----
-
-## Phase 2: Growth
-
-### Features
-- [ ] History feature (view past optimizations)
-- [ ] Monthly subscription options
-- [ ] Usage trends visualization
-- [ ] More complex packages
-- [ ] History as paid add-on (storage costs)
-
-### Subscription Plans
-| Plan | Credits/month | Price | Extras |
-|------|---------------|-------|--------|
-| Basic | 20 | $15/mo | History access |
-| Pro | 50 | $30/mo | History + Priority |
-| Team | 200 | $99/mo | Multi-user |
-
-### Dashboard Additions
-- Subscription Status widget
-- Usage Trends chart
-- History Browser
-
----
-
-## Phase 3: Advanced
-
-### Features
-- [ ] Application tracking system
-- [ ] Gmail/MCP integration for response analysis
-- [ ] Role-specific fine-tuning
-- [ ] A/B testing different CV versions
-- [ ] AI analysis: which CV versions perform better
-- [ ] Advanced analytics
-
-### Dashboard Additions
-- Applications Tracker widget
-- CV Performance metrics
-- Response Rate analytics
+Using skills + tools approach:
+- **Skill file:** CV optimization best practices, ATS rules, industry specifics
+- **Examples:** Before/after CV pairs for few-shot learning
+- **Tools:** analyze_jd(), score_match(), suggest_keywords()
+- **Provider:** OpenRouter (model flexibility)
 
 ---
 

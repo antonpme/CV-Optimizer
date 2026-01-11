@@ -8,7 +8,23 @@
       "Bash(ping:*)",
       "Bash(curl:*)",
       "Bash(git add:*)",
-      "Bash(powershell -Command \"Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue; Get-ChildItem -Name ''nul'' -ErrorAction SilentlyContinue\")"
+      "Bash(powershell -Command \"Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue; Get-ChildItem -Name ''nul'' -ErrorAction SilentlyContinue\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Phase 1 credits system foundation\n\n- Add shadcn/ui components \\(Button, Card, Badge, Dialog, etc.\\)\n- Create dashboard widgets \\(CreditsWidget, StatsWidget, ActivityWidget\\)\n- Add dashboard data fetching \\(getDashboardStats, getRecentActivity\\)\n- Integrate widgets into /app/page.tsx\n- Migrate @supabase/auth-helpers-nextjs → @supabase/ssr\n- Fix useFormState → useActionState \\(React 19\\)\n- Add database types for credits system \\(RPC functions\\)\n- Update pricing.ts for per-page model\n- Add comprehensive documentation \\(TASKS.md, DATABASE.md, DESIGN-SYSTEM.md, ROADMAP.md\\)\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh pr list:*)",
+      "Bash(where:*)",
+      "Bash(winget install:*)",
+      "Bash(cmd /c \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth status)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth status)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth login --web --git-protocol https)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" pr create --base main --head feature/ui-redesign --title \"feat: Phase 1 credits system foundation\" --body \"$\\(cat <<''EOF''\n## Summary\n- Add shadcn/ui components \\(Button, Card, Badge, Dialog, Tooltip, etc.\\)\n- Create dashboard widgets \\(CreditsWidget, StatsWidget, ActivityWidget\\)\n- Add dashboard data fetching \\(getDashboardStats, getRecentActivity\\)\n- Integrate widgets into /app/page.tsx\n- Migrate @supabase/auth-helpers-nextjs → @supabase/ssr\n- Fix useFormState → useActionState \\(React 19\\)\n- Add database types for credits system \\(RPC functions\\)\n- Update pricing.ts for per-page model\n- Add comprehensive documentation \\(TASKS.md, DATABASE.md, DESIGN-SYSTEM.md, ROADMAP.md\\)\n\n## Test plan\n- [ ] Verify dashboard renders with new widgets\n- [ ] Check credits balance displays correctly\n- [ ] Test activity widget shows transactions\n- [ ] Confirm mobile responsive layout\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" pr view 2 --repo antonpme/CV-Optimizer --json comments,url)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" pr merge 2 --repo antonpme/CV-Optimizer --squash --delete-branch)",
+      "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" api repos/antonpme/CV-Optimizer/deployments --jq '.[0] | {environment: .environment, state: .statuses_url, created: .created_at, sha: .sha[:7]}')",
+      "Bash(dir:*)",
+      "Bash(npx shadcn@latest add sheet:*)"
     ]
   }
 }
