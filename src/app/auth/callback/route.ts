@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const next = url.searchParams.get("next") ?? "/";
   const responseUrl = new URL(next, url.origin);
 
-  const supabase = createClientForRouteHandler();
+  const supabase = await createClientForRouteHandler();
   let authError: string | null = null;
 
   const code = url.searchParams.get("code");

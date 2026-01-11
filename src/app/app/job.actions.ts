@@ -28,7 +28,7 @@ export async function addJobDescription(
   _prev: JobActionState,
   formData: FormData,
 ): Promise<JobActionState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -94,7 +94,7 @@ export async function addJobDescription(
 }
 
 export async function deleteJobDescription(id: string) {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -124,7 +124,7 @@ export async function generateTailoredCvs(
   _prev: GenerateState,
   formData: FormData,
 ): Promise<GenerateState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -53,7 +53,7 @@ export async function updateProfile(
   _prevState: ProfileActionState,
   formData: FormData,
 ): Promise<ProfileActionState> {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();

@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import type { SignInState } from '@/app/actions/auth';
 import { signInWithEmail } from '@/app/actions/auth';
 
@@ -21,7 +22,7 @@ function SubmitButton() {
 }
 
 export function SignInForm() {
-  const [state, formAction] = useFormState(signInWithEmail, initialState);
+  const [state, formAction] = useActionState(signInWithEmail, initialState);
 
   return (
     <form className="grid gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm" action={formAction}>

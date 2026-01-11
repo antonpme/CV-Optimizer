@@ -7,7 +7,7 @@ import { createClientForServerAction } from '@/lib/supabase';
 type PlanPreset = PlanPresetKey;
 
 export async function setPlan(plan: PlanPreset) {
-  const supabase = createClientForServerAction();
+  const supabase = await createClientForServerAction();
   const {
     data: { session },
   } = await supabase.auth.getSession();
