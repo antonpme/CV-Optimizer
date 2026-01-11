@@ -1,74 +1,128 @@
 # CV Optimizer — Task Breakdown
 
-## Phase 1 Tasks
+## Phase 1 Scope (Refined)
 
-### Backend
+**JTBD:** "Help me tailor my CV for this specific job"
 
-#### Stripe Integration
-- [ ] Create Stripe products for credit packs
-- [ ] Create Stripe prices ($5, $10, $20, $50)
+### Core User Flow
+1. Upload CV → Create Master CV (5 credits)
+2. Add JD → Create Branch/Tailored CV (3 credits)
+3. Re-generate (1 credit) or Refine with feedback (2 credits)
+4. Export ready CV
+
+---
+
+## UI Redesign (Priority 1)
+
+### Layout Architecture
+- [ ] Implement sidebar navigation layout
+- [ ] Remove legacy single-page scroll design
+- [ ] Create app shell with consistent header
+
+### Pages Structure
+```
+/app
+├── /dashboard      → Overview + credits widget
+├── /cv-lab         → Master + Branches workflow (CV Branching)
+├── /jobs           → Saved JDs (manual add)
+├── /applications   → 🔒 Coming Q2 (placeholder)
+├── /billing        → Credits + transaction history
+└── /settings       → Profile
+```
+
+### Cleanup (Remove Legacy)
+- [ ] Remove `PlanUsageCard` component (old Free/Pro system)
+- [ ] Remove `CostSummaryCard` component (old AI spend tracking)
+- [ ] Remove "Switch to Free/Pro" dev helper buttons
+- [ ] Remove `user_entitlements` references from dashboard
+- [ ] Consolidate pricing configs into single source
+
+### New Components Needed
+- [ ] `Sidebar` — navigation component
+- [ ] `AppShell` — layout wrapper with sidebar + header
+- [ ] `CVLabView` — Master + Branches interface
+- [ ] `BranchCard` — single branch display with versions
+- [ ] `CostConfirmDialog` — "This will cost X credits. Proceed?"
+
+---
+
+## Backend
+
+### Stripe Integration
+- [ ] Create Stripe products for credit packs (10/25/60/150)
+- [ ] Create Stripe prices ($10, $20, $40, $75)
 - [ ] Implement `/api/checkout/route.ts` — create Checkout Session
 - [ ] Implement `/api/webhooks/stripe/route.ts` — handle events
 - [ ] Connect Stripe customer to Supabase user
 - [ ] Add credits on successful payment (webhook)
 
-#### Database
-- [x] `user_balances` table — created with stripe_customer_id
-- [x] `credit_transactions` table — created with Stripe references
-- [x] `stripe_events` table — created for webhook idempotency
+### Database (Already Done)
+- [x] `user_balances` table — with stripe_customer_id
+- [x] `credit_transactions` table — with Stripe references
+- [x] `stripe_events` table — for webhook idempotency
 - [x] `add_credits` RPC function
 - [x] `spend_credits` RPC function
 - [x] `link_stripe_customer` RPC function
 - [x] `get_user_by_stripe_customer` RPC function
-- [ ] Update pricing config for per-page model
 
-#### API Routes
+### Database (New for Branching)
+- [ ] Add `cv_branches` table (or extend `generated_cvs`)
+- [ ] Add `branch_versions` table for iteration history
+- [ ] Add version diffing support (optional, can store full text)
+
+### API Routes
 - [ ] `GET /api/credits/balance` — get current balance
 - [ ] `GET /api/credits/transactions` — get transaction history
 - [ ] `POST /api/credits/estimate` — estimate cost before action
+- [ ] `POST /api/cv/master` — create master CV
+- [ ] `POST /api/cv/branch` — create branch for JD
+- [ ] `POST /api/cv/regenerate` — regenerate branch version
+- [ ] `POST /api/cv/refine` — refine with user feedback
 
-### Frontend
+---
 
-#### UI Components (shadcn/ui)
-- [x] Install and configure shadcn/ui (tailwind-merge, clsx, cva)
-- [x] Button component (with variants)
-- [x] Card components (Card, CardHeader, CardTitle, etc.)
-- [x] Badge component (with success/warning variants)
-- [x] Skeleton component
-- [x] Progress component (Radix)
-- [x] Separator component (Radix)
-- [x] Input component
-- [x] Label component (Radix)
-- [x] Textarea component
-- [x] Dialog component (Radix)
-- [x] Tooltip component (Radix)
-- [x] Toast/Sonner component
-- [x] Barrel export (components/ui/index.ts)
+## UI Components (Already Done)
+- [x] shadcn/ui installed and configured
+- [x] Button, Card, Badge, Skeleton, Progress, Separator
+- [x] Input, Label, Textarea, Dialog, Tooltip, Sonner
+- [x] Dashboard widgets (Credits, Stats, Activity)
 
-#### Dashboard Widgets
-- [x] `CreditsWidget` — balance display with top-up CTA
-- [x] `StatsWidget` — CVs optimized, generated, credits used, total spent
-- [x] `ActivityWidget` — recent transactions list
-- [x] `dashboard.ts` — data fetching functions
-- [x] Integrate widgets into `/app/page.tsx`
+---
 
-#### Pages
-- [x] Redesign `/app` page with new dashboard (Dashboard Overview section added)
-- [ ] Create `/app/pricing` page — credit packs
-- [ ] Create `/app/billing` page — transaction history
-- [ ] Update navigation with new sections
+## Technical Improvements (Already Done)
+- [x] Migrated `@supabase/auth-helpers-nextjs` → `@supabase/ssr`
+- [x] Added `createServiceClient()` for webhook/admin operations
+- [x] Updated `database.ts` with full type definitions
+- [x] Fixed React 19 `useActionState` migration
 
-#### User Flows
-- [ ] Purchase credits flow (button → Stripe → success)
-- [ ] Insufficient credits warning before action
-- [ ] Success/error states for payments
+---
 
-### Design
-- [ ] Color palette finalization
-- [ ] Typography scale
-- [ ] Spacing system
-- [ ] Component variants (primary, secondary, ghost)
-- [ ] Dark mode support (optional Phase 1)
+## Environment Variables
+
+| Variable | Status | Notes |
+|----------|--------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ Set | From Supabase MCP |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ Set | From Supabase MCP |
+| `NEXT_PUBLIC_SITE_URL` | ✅ Set | Production URL |
+| `SUPABASE_SERVICE_ROLE` | ❌ TODO | Needed for webhooks |
+| `STRIPE_SECRET_KEY` | ❌ TODO | Needed for payments |
+| `STRIPE_WEBHOOK_SECRET` | ❌ TODO | Needed for webhooks |
+| `OPENROUTER_API_KEY` | ❌ TODO | For AI (replacing OpenAI) |
+
+---
+
+## Definition of Done (Phase 1)
+
+- [ ] Clean sidebar navigation UI
+- [ ] CV Lab with Master + Branches workflow
+- [ ] User can create Master CV (costs 5 credits)
+- [ ] User can create Branch per JD (costs 3 credits)
+- [ ] User can re-generate (1 credit) or refine (2 credits)
+- [ ] User can purchase credits via Stripe
+- [ ] Credits deducted on operations
+- [ ] User can see balance and transaction history
+- [ ] Mobile responsive
+- [ ] No legacy UI remnants
 
 ---
 

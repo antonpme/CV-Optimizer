@@ -40,3 +40,17 @@ export {
 
 // Toast
 export { Toaster, toast } from "./sonner";
+
+// Sheet (mobile drawer)
+export {
+  Sheet,
+  SheetPortal,
+  SheetOverlay,
+  SheetTrigger,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from "./sheet";
